@@ -18,12 +18,12 @@ func NewFriendRepository(pool *pgxpool.Pool) *FriendRepository {
 	return &FriendRepository{pool: pool}
 }
 
-func (r *FriendRepository) Create(ctx context.Context, friend *domain.Friend) error {
-	_, err := r.pool.Exec(ctx, `
-		INSERT INTO giftowner.friends (friend_id, user_id, user_relation, name, gender, birth_date, city)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+func (r *FriendRepository) Create(ctx context.Context, friend *domain.Friend) (*domain.Friend, error) {
+	row := r.pool.QueryRow(ctx, `
+		INSERT INTO giftowner.friends (user_id, user_relation, name, gender, birth_date, city)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING friend_id, user_id, user_relation, name, gender, birth_date, city
 	`,
-		friend.FriendID,
 		friend.UserID,
 		friend.UserRelation,
 		friend.Name,
@@ -31,7 +31,24 @@ func (r *FriendRepository) Create(ctx context.Context, friend *domain.Friend) er
 		nullableTime(friend.BirthDate),
 		nullableString(friend.City),
 	)
-	return err
+	return scanFriend(row)
+}
+
+func (r *FriendRepository) Update(ctx context.Context, friend *domain.Friend) (*domain.Friend, error) {
+	row := r.pool.QueryRow(ctx, `
+		UPDATE giftowner.friends
+		SET user_relation = $1, name = $2, gender = $3, birth_date = $4, city = $5, updated_at = now()
+		WHERE friend_id = $6
+		RETURNING friend_id, user_id, user_relation, name, gender, birth_date, city
+	`,
+		friend.UserRelation,
+		friend.Name,
+		string(friend.Gender),
+		nullableTime(friend.BirthDate),
+		nullableString(friend.City),
+		friend.FriendID,
+	)
+	return scanFriend(row)
 }
 
 func (r *FriendRepository) GetByID(ctx context.Context, friendID string) (*domain.Friend, error) {

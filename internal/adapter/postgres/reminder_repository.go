@@ -2,9 +2,11 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/gift-app/api/internal/domain"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -16,19 +18,59 @@ func NewReminderRepository(pool *pgxpool.Pool) *ReminderRepository {
 	return &ReminderRepository{pool: pool}
 }
 
-func (r *ReminderRepository) Create(ctx context.Context, reminder *domain.Reminder) error {
-	_, err := r.pool.Exec(ctx, `
-		INSERT INTO giftowner.reminders (reminder_id, user_id, friend_id, type, trigger_at, message)
-		VALUES ($1, $2, $3, $4, $5, $6)
+func (r *ReminderRepository) Create(ctx context.Context, reminder *domain.Reminder) (*domain.Reminder, error) {
+	var created domain.Reminder
+	var msg *string
+	var reminderType string
+
+	err := r.pool.QueryRow(ctx, `
+		INSERT INTO giftowner.reminders (user_id, friend_id, type, trigger_at, message)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING reminder_id, user_id, friend_id, type, trigger_at, message
 	`,
-		reminder.ReminderID,
 		reminder.UserID,
 		reminder.FriendID,
 		string(reminder.Type),
 		reminder.TriggerAt,
 		nullableString(reminder.Message),
-	)
-	return err
+	).Scan(&created.ReminderID, &created.UserID, &created.FriendID, &reminderType, &created.TriggerAt, &msg)
+	if err != nil {
+		return nil, err
+	}
+	created.Type = domain.ReminderType(reminderType)
+	if msg != nil {
+		created.Message = *msg
+	}
+	return &created, nil
+}
+
+func (r *ReminderRepository) Update(ctx context.Context, reminder *domain.Reminder) (*domain.Reminder, error) {
+	var updated domain.Reminder
+	var msg *string
+	var reminderType string
+
+	err := r.pool.QueryRow(ctx, `
+		UPDATE giftowner.reminders
+		SET type = $1, trigger_at = $2, message = $3, updated_at = now()
+		WHERE reminder_id = $4
+		RETURNING reminder_id, user_id, friend_id, type, trigger_at, message
+	`,
+		string(reminder.Type),
+		reminder.TriggerAt,
+		nullableString(reminder.Message),
+		reminder.ReminderID,
+	).Scan(&updated.ReminderID, &updated.UserID, &updated.FriendID, &reminderType, &updated.TriggerAt, &msg)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	updated.Type = domain.ReminderType(reminderType)
+	if msg != nil {
+		updated.Message = *msg
+	}
+	return &updated, nil
 }
 
 func (r *ReminderRepository) ListByUserID(ctx context.Context, userID string) ([]*domain.Reminder, error) {

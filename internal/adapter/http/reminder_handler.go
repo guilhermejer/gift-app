@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/gift-app/api/internal/domain"
@@ -21,36 +22,64 @@ func NewReminderHandler(repo port.ReminderRepository) *ReminderHandler {
 // @Tags        reminders
 // @Accept      json
 // @Produce     json
-// @Param       user_id  path string         true "ID do usuário"
+// @Param       user_id  path string          true "ID do usuário"
 // @Param       reminder body domain.Reminder true "Dados do lembrete"
 // @Success     201 {object} domain.Reminder
 // @Failure     400 {object} map[string]string
 // @Failure     500 {object} map[string]string
-// @Router      /users/{user_id}/reminders [post]
+// @Router      /users/{user_id}/reminders [put]
 func (h *ReminderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var reminder domain.Reminder
 	if err := json.NewDecoder(r.Body).Decode(&reminder); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		writeError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 	reminder.UserID = r.PathValue("user_id")
-	if reminder.ReminderID == "" {
-		writeError(w, http.StatusBadRequest, "reminder_id is required")
-		return
-	}
 	if reminder.FriendID == "" {
-		writeError(w, http.StatusBadRequest, "friend_id is required")
+		writeError(w, http.StatusBadRequest, "friend_id is required", errors.New("friend_id is required"))
 		return
 	}
 	if reminder.TriggerAt.IsZero() {
-		writeError(w, http.StatusBadRequest, "trigger_at is required")
+		writeError(w, http.StatusBadRequest, "trigger_at is required", errors.New("trigger_at is required"))
 		return
 	}
-	if err := h.repo.Create(r.Context(), &reminder); err != nil {
-		writeError(w, http.StatusInternalServerError, "could not create reminder")
+	created, err := h.repo.Create(r.Context(), &reminder)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "could not create reminder", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, reminder)
+	writeJSON(w, http.StatusCreated, created)
+}
+
+// Update godoc
+// @Summary     Atualizar lembrete
+// @Tags        reminders
+// @Accept      json
+// @Produce     json
+// @Param       reminder_id path string          true "ID do lembrete"
+// @Param       reminder    body domain.Reminder true "Dados a atualizar"
+// @Success     200 {object} domain.Reminder
+// @Failure     400 {object} map[string]string
+// @Failure     404 {object} map[string]string
+// @Failure     500 {object} map[string]string
+// @Router      /reminders/{reminder_id} [post]
+func (h *ReminderHandler) Update(w http.ResponseWriter, r *http.Request) {
+	var reminder domain.Reminder
+	if err := json.NewDecoder(r.Body).Decode(&reminder); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body", err)
+		return
+	}
+	reminder.ReminderID = r.PathValue("reminder_id")
+	updated, err := h.repo.Update(r.Context(), &reminder)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "could not update reminder", err)
+		return
+	}
+	if updated == nil {
+		writeError(w, http.StatusNotFound, "reminder not found", errors.New("reminder not found"))
+		return
+	}
+	writeJSON(w, http.StatusOK, updated)
 }
 
 // ListByUserID godoc
@@ -65,7 +94,7 @@ func (h *ReminderHandler) ListByUserID(w http.ResponseWriter, r *http.Request) {
 	userID := r.PathValue("user_id")
 	reminders, err := h.repo.ListByUserID(r.Context(), userID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "could not list reminders")
+		writeError(w, http.StatusInternalServerError, "could not list reminders", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, reminders)

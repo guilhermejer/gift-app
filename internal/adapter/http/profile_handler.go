@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/gift-app/api/internal/domain"
@@ -30,12 +31,12 @@ func NewProfileHandler(repo port.ProfileRepository) *ProfileHandler {
 func (h *ProfileHandler) Save(w http.ResponseWriter, r *http.Request) {
 	var profile domain.Profile
 	if err := json.NewDecoder(r.Body).Decode(&profile); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		writeError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 	profile.FriendID = r.PathValue("friend_id")
 	if err := h.repo.Save(r.Context(), &profile); err != nil {
-		writeError(w, http.StatusInternalServerError, "could not save profile")
+		writeError(w, http.StatusInternalServerError, "could not save profile", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, profile)
@@ -54,11 +55,11 @@ func (h *ProfileHandler) GetByFriendID(w http.ResponseWriter, r *http.Request) {
 	friendID := r.PathValue("friend_id")
 	profile, err := h.repo.GetByFriendID(r.Context(), friendID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "could not fetch profile")
+		writeError(w, http.StatusInternalServerError, "could not fetch profile", err)
 		return
 	}
 	if profile == nil {
-		writeError(w, http.StatusNotFound, "profile not found")
+		writeError(w, http.StatusNotFound, "profile not found", errors.New("profile not found"))
 		return
 	}
 	writeJSON(w, http.StatusOK, profile)
