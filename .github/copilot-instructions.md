@@ -24,6 +24,11 @@ Aplicação para sugestões de presentes a amigos e familiares. O usuário, com 
 - Prefira clareza de código à esperteza.
 - Não adicione comentários óbvios; comente apenas lógica não evidente.
 
+### Ferramentas do Copilot
+
+- **Prefira sempre as ferramentas nativas** (`create_file`, `create_directory`) para criar arquivos e pastas; evite usar comandos de terminal para isso.
+- Use o terminal apenas quando não houver ferramenta dedicada disponível para a operação (ex: `go mod init`, `go build`).
+
 ### Linguagem — Go (back-end REST)
 
 - Use Go idiomático: siga as convenções de nomenclatura, tratamento de erro e organização de pacotes da linguagem.
