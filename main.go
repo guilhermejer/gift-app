@@ -17,10 +17,15 @@ import (
 	httpadapter "github.com/gift-app/api/internal/adapter/http"
 	"github.com/gift-app/api/internal/adapter/llmapi"
 	"github.com/gift-app/api/internal/adapter/postgres"
+	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
 		log.Fatalf("DATABASE_URL is not set")

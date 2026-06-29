@@ -1416,23 +1416,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/domain.ReminderType"
+                    "type": "string"
                 },
                 "userID": {
                     "type": "string"
                 }
             }
-        },
-        "domain.ReminderType": {
-            "type": "string",
-            "enum": [
-                "birthday",
-                "custom"
-            ],
-            "x-enum-varnames": [
-                "ReminderTypeBirthday",
-                "ReminderTypeCustom"
-            ]
         },
         "domain.User": {
             "type": "object",
@@ -1567,7 +1556,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/domain.ReminderType"
+                    "type": "string"
                 },
                 "userID": {
                     "type": "string"

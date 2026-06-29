@@ -78,18 +78,10 @@ definitions:
       triggerAt:
         type: string
       type:
-        $ref: '#/definitions/domain.ReminderType'
+        type: string
       userID:
         type: string
     type: object
-  domain.ReminderType:
-    enum:
-    - birthday
-    - custom
-    type: string
-    x-enum-varnames:
-    - ReminderTypeBirthday
-    - ReminderTypeCustom
   domain.User:
     properties:
       active:
@@ -177,7 +169,7 @@ definitions:
       triggerAt:
         type: string
       type:
-        $ref: '#/definitions/domain.ReminderType'
+        type: string
       userID:
         type: string
     type: object
