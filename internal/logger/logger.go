@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	LevelInfo  = "info"
 	LevelError = "error"
 )
 
@@ -16,7 +17,7 @@ type Entry struct {
 	Date    string `json:"date"`
 	Time    string `json:"time"`
 	Message string `json:"message"`
-	Error   string `json:"error"`
+	Error   string `json:"error,omitempty"`
 }
 
 func Log(level, message string, err error) {

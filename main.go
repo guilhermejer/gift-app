@@ -10,9 +10,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 
 	_ "github.com/gift-app/api/docs"
 	httpadapter "github.com/gift-app/api/internal/adapter/http"
+	"github.com/gift-app/api/internal/adapter/llmapi"
 	"github.com/gift-app/api/internal/adapter/postgres"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
@@ -32,6 +35,10 @@ func main() {
 	userHandler := httpadapter.NewUserHandler(postgres.NewUserRepository(pool))
 	friendHandler := httpadapter.NewFriendHandler(postgres.NewFriendRepository(pool))
 	profileHandler := httpadapter.NewProfileHandler(postgres.NewProfileRepository(pool))
+	profileAgentHandler := httpadapter.NewProfileAgentHandler(
+		newLLMClientFromEnv(),
+		postgres.NewFriendRepository(pool),
+	)
 	giftHandler := httpadapter.NewGiftHandler(postgres.NewGiftRepository(pool))
 	reminderHandler := httpadapter.NewReminderHandler(postgres.NewReminderRepository(pool))
 
@@ -58,6 +65,9 @@ func main() {
 	// Profiles
 	mux.HandleFunc("PUT /friends/{friend_id}/profile", profileHandler.Save)
 	mux.HandleFunc("GET /friends/{friend_id}/profile", profileHandler.GetByFriendID)
+	mux.HandleFunc("POST /profiles/agent/chat", profileAgentHandler.Chat)
+	mux.HandleFunc("POST /profiles/agent/finalize", profileAgentHandler.Finalize)
+	mux.HandleFunc("DELETE /profiles/agent/session/{session_id}", profileAgentHandler.DeleteSession)
 
 	// Gifts
 	mux.HandleFunc("PUT /friends/{friend_id}/gifts", giftHandler.Create)
@@ -69,8 +79,27 @@ func main() {
 	mux.HandleFunc("GET /users/{user_id}/reminders", reminderHandler.ListByUserID)
 	mux.HandleFunc("POST /reminders/{reminder_id}", reminderHandler.Update)
 
+	handler := httpadapter.LoggingMiddleware(mux)
+
 	log.Println("server listening on :8080")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	if err := http.ListenAndServe(":8080", handler); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func newLLMClientFromEnv() *llmapi.Client {
+	baseURL := os.Getenv("GIFT_LLM_API_BASE_URL")
+	if baseURL == "" {
+		baseURL = "http://localhost:8000"
+	}
+
+	timeoutSeconds := 20
+	if rawTimeout := os.Getenv("GIFT_LLM_API_TIMEOUT_SECONDS"); rawTimeout != "" {
+		parsed, err := strconv.Atoi(rawTimeout)
+		if err == nil && parsed > 0 {
+			timeoutSeconds = parsed
+		}
+	}
+
+	return llmapi.NewClient(baseURL, time.Duration(timeoutSeconds)*time.Second)
 }

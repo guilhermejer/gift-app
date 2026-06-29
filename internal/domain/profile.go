@@ -1,7 +1,8 @@
 package domain
 
 type Profile struct {
-	FriendID string
-	Likes    []string
-	Dislikes []string
+	FriendID  string    `json:"friendID"`
+	Likes     []string  `json:"likes"`
+	Dislikes  []string  `json:"dislikes"`
+	Embedding []float32 `json:"embedding,omitempty"`
 }

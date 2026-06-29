@@ -52,6 +52,10 @@ definitions:
         items:
           type: string
         type: array
+      embedding:
+        items:
+          type: number
+        type: array
       friendID:
         type: string
       likes:
@@ -99,6 +103,20 @@ definitions:
       userID:
         type: string
     type: object
+  http.AgentChatRequest:
+    properties:
+      friend_id:
+        type: string
+      message:
+        type: string
+      session_id:
+        type: string
+    type: object
+  http.AgentFinalizeRequest:
+    properties:
+      session_id:
+        type: string
+    type: object
   http.FriendUpsertRequest:
     properties:
       birthDate:
@@ -111,6 +129,23 @@ definitions:
         type: string
       userRelation:
         type: string
+    type: object
+  http.ProfileUpsertRequest:
+    properties:
+      dislikes:
+        items:
+          type: string
+        type: array
+      embedding:
+        items:
+          type: number
+        type: array
+      friend_id:
+        type: string
+      likes:
+        items:
+          type: string
+        type: array
     type: object
   http.UserUpsertRequest:
     properties:
@@ -314,7 +349,7 @@ paths:
         name: profile
         required: true
         schema:
-          $ref: '#/definitions/domain.Profile'
+          $ref: '#/definitions/http.ProfileUpsertRequest'
       produces:
       - application/json
       responses:
@@ -324,6 +359,12 @@ paths:
             $ref: '#/definitions/domain.Profile'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable Entity
           schema:
             additionalProperties:
               type: string
@@ -381,6 +422,105 @@ paths:
       summary: Atualizar sugestão de presente
       tags:
       - gifts
+  /profiles/agent/chat:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Payload do chat
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/http.AgentChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Conversar com profile agent
+      tags:
+      - profile-agent
+  /profiles/agent/finalize:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Payload de finalização
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/http.AgentFinalizeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Finalizar sessão de profile agent
+      tags:
+      - profile-agent
+  /profiles/agent/session/{session_id}:
+    delete:
+      parameters:
+      - description: ID da sessão
+        in: path
+        name: session_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Remover sessão do profile agent
+      tags:
+      - profile-agent
   /reminders/{reminder_id}:
     post:
       consumes:
