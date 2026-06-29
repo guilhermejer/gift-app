@@ -21,7 +21,6 @@ func NewReminderRepository(pool *pgxpool.Pool) *ReminderRepository {
 func (r *ReminderRepository) Create(ctx context.Context, reminder *domain.Reminder) (*domain.Reminder, error) {
 	var created domain.Reminder
 	var msg *string
-	var reminderType string
 
 	err := r.pool.QueryRow(ctx, `
 		INSERT INTO giftowner.reminders (user_id, friend_id, type, trigger_at, message)
@@ -30,14 +29,14 @@ func (r *ReminderRepository) Create(ctx context.Context, reminder *domain.Remind
 	`,
 		reminder.UserID,
 		reminder.FriendID,
-		string(reminder.Type),
+		reminder.Type,
 		reminder.TriggerAt,
 		nullableString(reminder.Message),
-	).Scan(&created.ReminderID, &created.UserID, &created.FriendID, &reminderType, &created.TriggerAt, &msg)
+	).Scan(&created.ReminderID, &created.UserID, &created.FriendID, &created.Type, &created.TriggerAt, &msg)
 	if err != nil {
 		return nil, err
 	}
-	created.Type = domain.ReminderType(reminderType)
+
 	if msg != nil {
 		created.Message = *msg
 	}
@@ -47,7 +46,6 @@ func (r *ReminderRepository) Create(ctx context.Context, reminder *domain.Remind
 func (r *ReminderRepository) Update(ctx context.Context, reminder *domain.Reminder) (*domain.Reminder, error) {
 	var updated domain.Reminder
 	var msg *string
-	var reminderType string
 
 	err := r.pool.QueryRow(ctx, `
 		UPDATE giftowner.reminders
@@ -55,22 +53,46 @@ func (r *ReminderRepository) Update(ctx context.Context, reminder *domain.Remind
 		WHERE reminder_id = $4
 		RETURNING reminder_id, user_id, friend_id, type, trigger_at, message
 	`,
-		string(reminder.Type),
+		reminder.Type,
 		reminder.TriggerAt,
 		nullableString(reminder.Message),
 		reminder.ReminderID,
-	).Scan(&updated.ReminderID, &updated.UserID, &updated.FriendID, &reminderType, &updated.TriggerAt, &msg)
+	).Scan(&updated.ReminderID, &updated.UserID, &updated.FriendID, &updated.Type, &updated.TriggerAt, &msg)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	updated.Type = domain.ReminderType(reminderType)
 	if msg != nil {
 		updated.Message = *msg
 	}
 	return &updated, nil
+}
+
+func (r *ReminderRepository) GetByID(ctx context.Context, reminderID string) (*domain.Reminder, error) {
+	row := r.pool.QueryRow(ctx, `
+		SELECT reminder_id, user_id, friend_id, type, trigger_at, message
+		FROM giftowner.reminders
+		WHERE reminder_id = $1
+	`, reminderID)
+
+	var reminder domain.Reminder
+	var message *string
+
+	err := row.Scan(&reminder.ReminderID, &reminder.UserID, &reminder.FriendID, &reminder.Type, &reminder.TriggerAt, &message)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if message != nil {
+		reminder.Message = *message
+	}
+
+	return &reminder, nil
 }
 
 func (r *ReminderRepository) ListByUserID(ctx context.Context, userID string) ([]*domain.Reminder, error) {
@@ -112,12 +134,10 @@ func scanReminders(rows interface {
 	for rows.Next() {
 		var rem domain.Reminder
 		var msg *string
-		var reminderType string
 
-		if err := rows.Scan(&rem.ReminderID, &rem.UserID, &rem.FriendID, &reminderType, &rem.TriggerAt, &msg); err != nil {
+		if err := rows.Scan(&rem.ReminderID, &rem.UserID, &rem.FriendID, &rem.Type, &rem.TriggerAt, &msg); err != nil {
 			return nil, err
 		}
-		rem.Type = domain.ReminderType(reminderType)
 		if msg != nil {
 			rem.Message = *msg
 		}

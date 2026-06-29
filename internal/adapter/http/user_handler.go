@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gift-app/api/internal/domain"
@@ -152,5 +153,35 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "user not found", errors.New("user not found"))
 		return
 	}
+	writeJSON(w, http.StatusOK, user)
+}
+
+// GetByEmail godoc
+// @Summary     Buscar usuário por email
+// @Tags        users
+// @Produce     json
+// @Param       email query string true "Email do usuário"
+// @Success     200 {object} domain.User
+// @Failure     400 {object} map[string]string
+// @Failure     404 {object} map[string]string
+// @Failure     500 {object} map[string]string
+// @Router      /users/email [get]
+func (h *UserHandler) GetByEmail(w http.ResponseWriter, r *http.Request) {
+	email := strings.TrimSpace(r.URL.Query().Get("email"))
+	if email == "" {
+		writeError(w, http.StatusBadRequest, "email query parameter is required", errors.New("missing email"))
+		return
+	}
+
+	user, err := h.repo.GetByEmail(r.Context(), email)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "could not fetch user by email", err)
+		return
+	}
+	if user == nil {
+		writeError(w, http.StatusNotFound, "user not found", errors.New("user not found"))
+		return
+	}
+
 	writeJSON(w, http.StatusOK, user)
 }

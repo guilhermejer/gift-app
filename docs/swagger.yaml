@@ -37,7 +37,11 @@ definitions:
         type: string
       giftID:
         type: string
+      occasionDetails:
+        type: string
       priceRange:
+        type: string
+      reminderID:
         type: string
       tags:
         items:
@@ -109,12 +113,10 @@ definitions:
         type: string
       message:
         type: string
-      session_id:
-        type: string
     type: object
   http.AgentFinalizeRequest:
     properties:
-      session_id:
+      friend_id:
         type: string
     type: object
   http.FriendUpsertRequest:
@@ -128,6 +130,25 @@ definitions:
       name:
         type: string
       userRelation:
+        type: string
+    type: object
+  http.GiftUpsertRequest:
+    properties:
+      description:
+        type: string
+      friendID:
+        type: string
+      occasionDetails:
+        type: string
+      priceRange:
+        type: string
+      reminderID:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
         type: string
     type: object
   http.ProfileUpsertRequest:
@@ -146,6 +167,38 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  http.ReminderUpsertRequest:
+    properties:
+      friendID:
+        type: string
+      message:
+        type: string
+      triggerAt:
+        type: string
+      type:
+        $ref: '#/definitions/domain.ReminderType'
+      userID:
+        type: string
+    type: object
+  http.SuggestionChatRequest:
+    properties:
+      gift_id:
+        type: string
+      message:
+        type: string
+    type: object
+  http.SuggestionCreateRequest:
+    properties:
+      occasion_details:
+        type: string
+      reminder_id:
+        type: string
+    type: object
+  http.SuggestionFinalizeRequest:
+    properties:
+      gift_id:
+        type: string
     type: object
   http.UserUpsertRequest:
     properties:
@@ -282,7 +335,7 @@ paths:
         name: gift
         required: true
         schema:
-          $ref: '#/definitions/domain.Gift'
+          $ref: '#/definitions/http.GiftUpsertRequest'
       produces:
       - application/json
       responses:
@@ -292,6 +345,18 @@ paths:
             $ref: '#/definitions/domain.Gift'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
           schema:
             additionalProperties:
               type: string
@@ -393,7 +458,7 @@ paths:
         name: gift
         required: true
         schema:
-          $ref: '#/definitions/domain.Gift'
+          $ref: '#/definitions/http.GiftUpsertRequest'
       produces:
       - application/json
       responses:
@@ -413,6 +478,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -422,6 +493,57 @@ paths:
       summary: Atualizar sugestão de presente
       tags:
       - gifts
+  /profiles/{friend_id}/suggestions:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID do friend
+        in: path
+        name: friend_id
+        required: true
+        type: string
+      - description: Dados da ocasião
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/http.SuggestionCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Criar sugestão inicial para friend
+      tags:
+      - suggestion-agent
   /profiles/agent/chat:
     post:
       consumes:
@@ -487,6 +609,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -496,12 +624,12 @@ paths:
       summary: Finalizar sessão de profile agent
       tags:
       - profile-agent
-  /profiles/agent/session/{session_id}:
+  /profiles/agent/session/{friend_id}:
     delete:
       parameters:
-      - description: ID da sessão
+      - description: ID do friend
         in: path
-        name: session_id
+        name: friend_id
         required: true
         type: string
       produces:
@@ -511,6 +639,18 @@ paths:
           description: OK
           schema:
             additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
             type: object
         "500":
           description: Internal Server Error
@@ -536,7 +676,7 @@ paths:
         name: reminder
         required: true
         schema:
-          $ref: '#/definitions/domain.Reminder'
+          $ref: '#/definitions/http.ReminderUpsertRequest'
       produces:
       - application/json
       responses:
@@ -565,6 +705,86 @@ paths:
       summary: Atualizar lembrete
       tags:
       - reminders
+  /suggestions/agent/chat:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Payload do chat
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/http.SuggestionChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Conversar para refinar sugestão por gift
+      tags:
+      - suggestion-agent
+  /suggestions/agent/finalize:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Payload de finalização
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/http.SuggestionFinalizeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Finalizar refinamento de sugestão por gift
+      tags:
+      - suggestion-agent
   /users:
     put:
       consumes:
@@ -786,7 +1006,7 @@ paths:
         name: reminder
         required: true
         schema:
-          $ref: '#/definitions/domain.Reminder'
+          $ref: '#/definitions/http.ReminderUpsertRequest'
       produces:
       - application/json
       responses:
@@ -809,4 +1029,40 @@ paths:
       summary: Criar lembrete
       tags:
       - reminders
+  /users/email:
+    get:
+      parameters:
+      - description: Email do usuário
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Buscar usuário por email
+      tags:
+      - users
 swagger: "2.0"

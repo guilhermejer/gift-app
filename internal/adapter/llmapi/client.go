@@ -61,13 +61,26 @@ func (c *Client) Finalize(ctx context.Context, requestID string, payload any) (m
 	return c.doJSON(ctx, http.MethodPost, "/profiles/agent/finalize", requestID, payload)
 }
 
-func (c *Client) DeleteSession(ctx context.Context, requestID, sessionID string) (map[string]any, error) {
-	path := "/profiles/agent/session/" + sessionID
+func (c *Client) DeleteSession(ctx context.Context, requestID, friendID string) (map[string]any, error) {
+	path := "/profiles/agent/session/" + friendID
 	return c.doJSON(ctx, http.MethodDelete, path, requestID, nil)
 }
 
 func (c *Client) Health(ctx context.Context, requestID string) (map[string]any, error) {
 	return c.doJSON(ctx, http.MethodGet, "/health", requestID, nil)
+}
+
+func (c *Client) SuggestionChat(ctx context.Context, requestID string, payload any) (map[string]any, error) {
+	return c.doJSON(ctx, http.MethodPost, "/suggestions/agent/chat", requestID, payload)
+}
+
+func (c *Client) SuggestionCreate(ctx context.Context, requestID, friendID string, payload any) (map[string]any, error) {
+	path := "/profiles/" + friendID + "/suggestions"
+	return c.doJSON(ctx, http.MethodPost, path, requestID, payload)
+}
+
+func (c *Client) SuggestionFinalize(ctx context.Context, requestID string, payload any) (map[string]any, error) {
+	return c.doJSON(ctx, http.MethodPost, "/suggestions/agent/finalize", requestID, payload)
 }
 
 func (c *Client) doJSON(ctx context.Context, method, path, requestID string, body any) (map[string]any, error) {

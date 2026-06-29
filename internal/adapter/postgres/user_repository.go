@@ -118,6 +118,39 @@ func (r *UserRepository) GetByID(ctx context.Context, userID string) (*domain.Us
 	return &u, nil
 }
 
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	row := r.pool.QueryRow(ctx, `
+		SELECT user_id, active, plan_id, birth_date, city, full_name, email
+		FROM giftowner.users
+		WHERE lower(email) = lower($1)
+	`, email)
+
+	var u domain.User
+	var planID *string
+	var birthDate *time.Time
+	var city *string
+
+	err := row.Scan(&u.UserID, &u.Active, &planID, &birthDate, &city, &u.FullName, &u.Email)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if planID != nil {
+		u.PlanID = *planID
+	}
+	if birthDate != nil {
+		u.BirthDate = *birthDate
+	}
+	if city != nil {
+		u.City = *city
+	}
+
+	return &u, nil
+}
+
 func isUniqueEmailViolation(err error) bool {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {

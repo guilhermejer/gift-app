@@ -17,6 +17,7 @@ type HTTPRequestEntry struct {
 	Query      string `json:"query,omitempty"`
 	RemoteAddr string `json:"remote_addr,omitempty"`
 	UserAgent  string `json:"user_agent,omitempty"`
+	Payload    string `json:"payload,omitempty"`
 }
 
 type HTTPResponseEntry struct {
@@ -30,9 +31,10 @@ type HTTPResponseEntry struct {
 	Status        int    `json:"status"`
 	LatencyMs     int64  `json:"latency_ms"`
 	ResponseBytes int    `json:"response_bytes"`
+	Payload       string `json:"payload,omitempty"`
 }
 
-func LogRequest(requestID, method, path, query, remoteAddr, userAgent string) {
+func LogRequest(requestID, method, path, query, remoteAddr, userAgent, payload string) {
 	now := time.Now()
 	entry := HTTPRequestEntry{
 		Level:      LevelInfo,
@@ -45,11 +47,12 @@ func LogRequest(requestID, method, path, query, remoteAddr, userAgent string) {
 		Query:      query,
 		RemoteAddr: remoteAddr,
 		UserAgent:  userAgent,
+		Payload:    payload,
 	}
 	logEntry(entry)
 }
 
-func LogResponse(requestID, method, path string, status int, latency time.Duration, responseBytes int) {
+func LogResponse(requestID, method, path string, status int, latency time.Duration, responseBytes int, payload string) {
 	now := time.Now()
 	entry := HTTPResponseEntry{
 		Level:         LevelInfo,
@@ -62,6 +65,7 @@ func LogResponse(requestID, method, path string, status int, latency time.Durati
 		Status:        status,
 		LatencyMs:     latency.Milliseconds(),
 		ResponseBytes: responseBytes,
+		Payload:       payload,
 	}
 	logEntry(entry)
 }

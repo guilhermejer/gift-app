@@ -23,7 +23,7 @@ import (
 func main() {
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
-		connStr = "postgres://giftowner:giftowner@localhost:6432/giftdb?sslmode=disable"
+		log.Fatalf("DATABASE_URL is not set")
 	}
 
 	pool, err := postgres.NewPool(context.Background(), connStr)
@@ -39,7 +39,17 @@ func main() {
 		newLLMClientFromEnv(),
 		postgres.NewFriendRepository(pool),
 	)
-	giftHandler := httpadapter.NewGiftHandler(postgres.NewGiftRepository(pool))
+	suggestionAgentHandler := httpadapter.NewSuggestionAgentHandler(
+		newLLMClientFromEnv(),
+		postgres.NewGiftRepository(pool),
+		postgres.NewFriendRepository(pool),
+		postgres.NewReminderRepository(pool),
+	)
+	giftHandler := httpadapter.NewGiftHandler(
+		postgres.NewGiftRepository(pool),
+		postgres.NewFriendRepository(pool),
+		postgres.NewReminderRepository(pool),
+	)
 	reminderHandler := httpadapter.NewReminderHandler(postgres.NewReminderRepository(pool))
 
 	mux := http.NewServeMux()
@@ -53,6 +63,7 @@ func main() {
 
 	// Users
 	mux.HandleFunc("PUT /users", userHandler.Create)
+	mux.HandleFunc("GET /users/email", userHandler.GetByEmail)
 	mux.HandleFunc("GET /users/{user_id}", userHandler.GetByID)
 	mux.HandleFunc("POST /users/{user_id}", userHandler.Update)
 
@@ -67,7 +78,10 @@ func main() {
 	mux.HandleFunc("GET /friends/{friend_id}/profile", profileHandler.GetByFriendID)
 	mux.HandleFunc("POST /profiles/agent/chat", profileAgentHandler.Chat)
 	mux.HandleFunc("POST /profiles/agent/finalize", profileAgentHandler.Finalize)
-	mux.HandleFunc("DELETE /profiles/agent/session/{session_id}", profileAgentHandler.DeleteSession)
+	mux.HandleFunc("DELETE /profiles/agent/session/{friend_id}", profileAgentHandler.DeleteSession)
+	mux.HandleFunc("POST /profiles/{friend_id}/suggestions", suggestionAgentHandler.Create)
+	mux.HandleFunc("POST /suggestions/agent/chat", suggestionAgentHandler.Chat)
+	mux.HandleFunc("POST /suggestions/agent/finalize", suggestionAgentHandler.Finalize)
 
 	// Gifts
 	mux.HandleFunc("PUT /friends/{friend_id}/gifts", giftHandler.Create)

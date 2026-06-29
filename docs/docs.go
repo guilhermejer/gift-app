@@ -190,7 +190,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Gift"
+                            "$ref": "#/definitions/http.GiftUpsertRequest"
                         }
                     }
                 ],
@@ -203,6 +203,24 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -359,7 +377,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Gift"
+                            "$ref": "#/definitions/http.GiftUpsertRequest"
                         }
                     }
                 ],
@@ -381,6 +399,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -501,6 +528,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -513,7 +549,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/profiles/agent/session/{session_id}": {
+        "/profiles/agent/session/{friend_id}": {
             "delete": {
                 "produces": [
                     "application/json"
@@ -525,8 +561,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID da sessão",
-                        "name": "session_id",
+                        "description": "ID do friend",
+                        "name": "friend_id",
                         "in": "path",
                         "required": true
                     }
@@ -537,6 +573,101 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profiles/{friend_id}/suggestions": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "suggestion-agent"
+                ],
+                "summary": "Criar sugestão inicial para friend",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do friend",
+                        "name": "friend_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados da ocasião",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.SuggestionCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
@@ -577,7 +708,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Reminder"
+                            "$ref": "#/definitions/http.ReminderUpsertRequest"
                         }
                     }
                 ],
@@ -586,6 +717,128 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/domain.Reminder"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/suggestions/agent/chat": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "suggestion-agent"
+                ],
+                "summary": "Conversar para refinar sugestão por gift",
+                "parameters": [
+                    {
+                        "description": "Payload do chat",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.SuggestionChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/suggestions/agent/finalize": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "suggestion-agent"
+                ],
+                "summary": "Finalizar refinamento de sugestão por gift",
+                "parameters": [
+                    {
+                        "description": "Payload de finalização",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.SuggestionFinalizeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -659,6 +912,61 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/email": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Buscar usuário por email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email do usuário",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -958,7 +1266,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Reminder"
+                            "$ref": "#/definitions/http.ReminderUpsertRequest"
                         }
                     }
                 ],
@@ -1046,7 +1354,13 @@ const docTemplate = `{
                 "giftID": {
                     "type": "string"
                 },
+                "occasionDetails": {
+                    "type": "string"
+                },
                 "priceRange": {
+                    "type": "string"
+                },
+                "reminderID": {
                     "type": "string"
                 },
                 "tags": {
@@ -1154,16 +1468,13 @@ const docTemplate = `{
                 },
                 "message": {
                     "type": "string"
-                },
-                "session_id": {
-                    "type": "string"
                 }
             }
         },
         "http.AgentFinalizeRequest": {
             "type": "object",
             "properties": {
-                "session_id": {
+                "friend_id": {
                     "type": "string"
                 }
             }
@@ -1184,6 +1495,35 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "userRelation": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.GiftUpsertRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "friendID": {
+                    "type": "string"
+                },
+                "occasionDetails": {
+                    "type": "string"
+                },
+                "priceRange": {
+                    "type": "string"
+                },
+                "reminderID": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -1211,6 +1551,56 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "http.ReminderUpsertRequest": {
+            "type": "object",
+            "properties": {
+                "friendID": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "triggerAt": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/domain.ReminderType"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.SuggestionChatRequest": {
+            "type": "object",
+            "properties": {
+                "gift_id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.SuggestionCreateRequest": {
+            "type": "object",
+            "properties": {
+                "occasion_details": {
+                    "type": "string"
+                },
+                "reminder_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.SuggestionFinalizeRequest": {
+            "type": "object",
+            "properties": {
+                "gift_id": {
+                    "type": "string"
                 }
             }
         },

@@ -18,13 +18,12 @@ type ProfileAgentHandler struct {
 }
 
 type AgentChatRequest struct {
-	SessionID string `json:"session_id"`
-	FriendID  string `json:"friend_id"`
-	Message   string `json:"message"`
+	FriendID string `json:"friend_id"`
+	Message  string `json:"message"`
 }
 
 type AgentFinalizeRequest struct {
-	SessionID string `json:"session_id"`
+	FriendID string `json:"friend_id"`
 }
 
 func NewProfileAgentHandler(llmClient *llmapi.Client, friendRepo port.FriendRepository) *ProfileAgentHandler {
@@ -49,8 +48,8 @@ func (h *ProfileAgentHandler) Chat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.SessionID == "" || req.FriendID == "" || req.Message == "" {
-		writeError(w, http.StatusBadRequest, "session_id, friend_id and message are required", errors.New("missing required fields"))
+	if req.FriendID == "" || req.Message == "" {
+		writeError(w, http.StatusBadRequest, "friend_id and message are required", errors.New("missing required fields"))
 		return
 	}
 	if !uuidPattern.MatchString(req.FriendID) {
@@ -85,6 +84,7 @@ func (h *ProfileAgentHandler) Chat(w http.ResponseWriter, r *http.Request) {
 // @Param       payload body AgentFinalizeRequest true "Payload de finalização"
 // @Success     200 {object} map[string]any
 // @Failure     400 {object} map[string]string
+// @Failure     404 {object} map[string]string
 // @Failure     500 {object} map[string]string
 // @Router      /profiles/agent/finalize [post]
 func (h *ProfileAgentHandler) Finalize(w http.ResponseWriter, r *http.Request) {
@@ -93,8 +93,22 @@ func (h *ProfileAgentHandler) Finalize(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-	if req.SessionID == "" {
-		writeError(w, http.StatusBadRequest, "session_id is required", errors.New("missing session_id"))
+	if req.FriendID == "" {
+		writeError(w, http.StatusBadRequest, "friend_id is required", errors.New("missing friend_id"))
+		return
+	}
+	if !uuidPattern.MatchString(req.FriendID) {
+		writeError(w, http.StatusBadRequest, "friend_id must be a valid UUID", errors.New("invalid friend_id"))
+		return
+	}
+
+	friend, err := h.friendRepo.GetByID(r.Context(), req.FriendID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "could not validate friend", err)
+		return
+	}
+	if friend == nil {
+		writeError(w, http.StatusNotFound, "friend not found", errors.New("friend not found"))
 		return
 	}
 
@@ -111,18 +125,34 @@ func (h *ProfileAgentHandler) Finalize(w http.ResponseWriter, r *http.Request) {
 // @Summary     Remover sessão do profile agent
 // @Tags        profile-agent
 // @Produce     json
-// @Param       session_id path string true "ID da sessão"
+// @Param       friend_id path string true "ID do friend"
 // @Success     200 {object} map[string]any
+// @Failure     400 {object} map[string]string
+// @Failure     404 {object} map[string]string
 // @Failure     500 {object} map[string]string
-// @Router      /profiles/agent/session/{session_id} [delete]
+// @Router      /profiles/agent/session/{friend_id} [delete]
 func (h *ProfileAgentHandler) DeleteSession(w http.ResponseWriter, r *http.Request) {
-	sessionID := r.PathValue("session_id")
-	if sessionID == "" {
-		writeError(w, http.StatusBadRequest, "session_id is required", errors.New("missing session_id"))
+	friendID := r.PathValue("friend_id")
+	if friendID == "" {
+		writeError(w, http.StatusBadRequest, "friend_id is required", errors.New("missing friend_id"))
+		return
+	}
+	if !uuidPattern.MatchString(friendID) {
+		writeError(w, http.StatusBadRequest, "friend_id must be a valid UUID", errors.New("invalid friend_id"))
 		return
 	}
 
-	response, err := h.llmClient.DeleteSession(r.Context(), r.Header.Get("X-Request-ID"), sessionID)
+	friend, err := h.friendRepo.GetByID(r.Context(), friendID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "could not validate friend", err)
+		return
+	}
+	if friend == nil {
+		writeError(w, http.StatusNotFound, "friend not found", errors.New("friend not found"))
+		return
+	}
+
+	response, err := h.llmClient.DeleteSession(r.Context(), r.Header.Get("X-Request-ID"), friendID)
 	if err != nil {
 		h.writeLLMError(w, err, "could not delete profile session")
 		return

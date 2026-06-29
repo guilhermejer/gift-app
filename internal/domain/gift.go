@@ -1,10 +1,12 @@
 package domain
 
 type Gift struct {
-	GiftID      string
-	FriendID    string
-	Title       string
-	Description string
-	PriceRange  string
-	Tags        []string
+	GiftID          string   `json:"giftID"`
+	FriendID        string   `json:"friendID"`
+	Title           string   `json:"title"`
+	Description     string   `json:"description"`
+	PriceRange      string   `json:"priceRange"`
+	Tags            []string `json:"tags"`
+	OccasionDetails string   `json:"occasionDetails,omitempty"`
+	ReminderID      string   `json:"reminderID,omitempty"`
 }
