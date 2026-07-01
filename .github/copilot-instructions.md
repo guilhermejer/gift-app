@@ -76,3 +76,10 @@ internal/
 - Não exponha detalhes internos de erro ao cliente; logue server-side.
 - Use variáveis de ambiente para segredos (nunca hardcode).
 - Aplique autenticação nas rotas que exigem identidade do usuário.
+
+
+### Documentação
+- Estamos utilizando swaggo para gerar documentação Swagger automaticamente a partir dos comentários nos handlers HTTP. Procure manter os comentários atualizados e claros para que a documentação reflita corretamente a API.
+
+### Padronização de api
+- As requests e reponses da API devem seguir o padrão JSON, com campos em camelCase.

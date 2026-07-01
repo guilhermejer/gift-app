@@ -18,12 +18,12 @@ type ProfileAgentHandler struct {
 }
 
 type AgentChatRequest struct {
-	FriendID string `json:"friend_id"`
-	Message  string `json:"message"`
+	FriendID string `json:"friendID" example:"9b02ce54-4f42-4a8b-a539-5b53a6e37e63"`
+	Message  string `json:"message" example:"Ela prefere experiencias ou objetos?"`
 }
 
 type AgentFinalizeRequest struct {
-	FriendID string `json:"friend_id"`
+	FriendID string `json:"friendID" example:"9b02ce54-4f42-4a8b-a539-5b53a6e37e63"`
 }
 
 func NewProfileAgentHandler(llmClient *llmapi.Client, friendRepo port.FriendRepository) *ProfileAgentHandler {
@@ -32,14 +32,15 @@ func NewProfileAgentHandler(llmClient *llmapi.Client, friendRepo port.FriendRepo
 
 // Chat godoc
 // @Summary     Conversar com profile agent
+// @Description Exemplo de payload: {"friendID":"9b02ce54-4f42-4a8b-a539-5b53a6e37e63","message":"Ela prefere experiencias ou objetos?"}.
 // @Tags        profile-agent
 // @Accept      json
 // @Produce     json
 // @Param       payload body AgentChatRequest true "Payload do chat"
 // @Success     200 {object} map[string]any
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
 // @Router      /profiles/agent/chat [post]
 func (h *ProfileAgentHandler) Chat(w http.ResponseWriter, r *http.Request) {
 	var req AgentChatRequest
@@ -49,11 +50,11 @@ func (h *ProfileAgentHandler) Chat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.FriendID == "" || req.Message == "" {
-		writeError(w, http.StatusBadRequest, "friend_id and message are required", errors.New("missing required fields"))
+		writeError(w, http.StatusBadRequest, "friendID and message are required", errors.New("missing required fields"))
 		return
 	}
 	if !uuidPattern.MatchString(req.FriendID) {
-		writeError(w, http.StatusBadRequest, "friend_id must be a valid UUID", errors.New("invalid friend_id"))
+		writeError(w, http.StatusBadRequest, "friendID must be a valid UUID", errors.New("invalid friendID"))
 		return
 	}
 
@@ -78,14 +79,15 @@ func (h *ProfileAgentHandler) Chat(w http.ResponseWriter, r *http.Request) {
 
 // Finalize godoc
 // @Summary     Finalizar sessão de profile agent
+// @Description Exemplo de payload: {"friendID":"9b02ce54-4f42-4a8b-a539-5b53a6e37e63"}.
 // @Tags        profile-agent
 // @Accept      json
 // @Produce     json
 // @Param       payload body AgentFinalizeRequest true "Payload de finalização"
 // @Success     200 {object} map[string]any
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
 // @Router      /profiles/agent/finalize [post]
 func (h *ProfileAgentHandler) Finalize(w http.ResponseWriter, r *http.Request) {
 	var req AgentFinalizeRequest
@@ -94,11 +96,11 @@ func (h *ProfileAgentHandler) Finalize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if req.FriendID == "" {
-		writeError(w, http.StatusBadRequest, "friend_id is required", errors.New("missing friend_id"))
+		writeError(w, http.StatusBadRequest, "friendID is required", errors.New("missing friendID"))
 		return
 	}
 	if !uuidPattern.MatchString(req.FriendID) {
-		writeError(w, http.StatusBadRequest, "friend_id must be a valid UUID", errors.New("invalid friend_id"))
+		writeError(w, http.StatusBadRequest, "friendID must be a valid UUID", errors.New("invalid friendID"))
 		return
 	}
 
@@ -125,20 +127,20 @@ func (h *ProfileAgentHandler) Finalize(w http.ResponseWriter, r *http.Request) {
 // @Summary     Remover sessão do profile agent
 // @Tags        profile-agent
 // @Produce     json
-// @Param       friend_id path string true "ID do friend"
+// @Param       friendId path string true "ID do friend"
 // @Success     200 {object} map[string]any
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /profiles/agent/session/{friend_id} [delete]
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /profiles/agent/session/{friendId} [delete]
 func (h *ProfileAgentHandler) DeleteSession(w http.ResponseWriter, r *http.Request) {
-	friendID := r.PathValue("friend_id")
+	friendID := r.PathValue("friendId")
 	if friendID == "" {
-		writeError(w, http.StatusBadRequest, "friend_id is required", errors.New("missing friend_id"))
+		writeError(w, http.StatusBadRequest, "friendId is required", errors.New("missing friendId"))
 		return
 	}
 	if !uuidPattern.MatchString(friendID) {
-		writeError(w, http.StatusBadRequest, "friend_id must be a valid UUID", errors.New("invalid friend_id"))
+		writeError(w, http.StatusBadRequest, "friendId must be a valid UUID", errors.New("invalid friendId"))
 		return
 	}
 

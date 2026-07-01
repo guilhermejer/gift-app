@@ -15,11 +15,11 @@ type FriendHandler struct {
 }
 
 type FriendUpsertRequest struct {
-	UserRelation string `json:"userRelation"`
-	Name         string `json:"name"`
-	Gender       string `json:"gender"`
-	BirthDate    string `json:"birthDate"`
-	City         string `json:"city"`
+	UserRelation string `json:"userRelation" example:"irma"`
+	Name         string `json:"name" example:"Mariana Souza"`
+	Gender       string `json:"gender" example:"female"`
+	BirthDate    string `json:"birthDate" format:"date" example:"1994-10-03"`
+	City         string `json:"city" example:"Belo Horizonte"`
 }
 
 func NewFriendHandler(repo port.FriendRepository) *FriendHandler {
@@ -28,15 +28,16 @@ func NewFriendHandler(repo port.FriendRepository) *FriendHandler {
 
 // Create godoc
 // @Summary     Criar amigo
+// @Description Exemplo de payload: {"userRelation":"irma","name":"Mariana Souza","gender":"female","birthDate":"1994-10-03","city":"Belo Horizonte"}. Campo birthDate no formato YYYY-MM-DD.
 // @Tags        friends
 // @Accept      json
 // @Produce     json
-// @Param       user_id path string        true "ID do usuário"
+// @Param       userId path string        true "ID do usuário"
 // @Param       friend  body FriendUpsertRequest true "Dados do amigo"
 // @Success     201 {object} domain.Friend
-// @Failure     400 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /users/{user_id}/friends [put]
+// @Failure     400 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /users/{userId}/friends [put]
 func (h *FriendHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req FriendUpsertRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -55,7 +56,7 @@ func (h *FriendHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	friend := domain.Friend{
-		UserID:       r.PathValue("user_id"),
+		UserID:       r.PathValue("userId"),
 		UserRelation: req.UserRelation,
 		Name:         req.Name,
 		Gender:       domain.Gender(req.Gender),
@@ -77,16 +78,17 @@ func (h *FriendHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // Update godoc
 // @Summary     Atualizar amigo
+// @Description Exemplo de payload: {"userRelation":"prima","name":"Mariana Souza","gender":"female","birthDate":"1994-10-03","city":"Curitiba"}. Campo birthDate no formato YYYY-MM-DD.
 // @Tags        friends
 // @Accept      json
 // @Produce     json
-// @Param       friend_id path string        true "ID do amigo"
+// @Param       friendId path string        true "ID do amigo"
 // @Param       friend    body FriendUpsertRequest true "Dados a atualizar"
 // @Success     200 {object} domain.Friend
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /friends/{friend_id} [post]
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /friends/{friendId} [post]
 func (h *FriendHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var req FriendUpsertRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -105,7 +107,7 @@ func (h *FriendHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	friend := domain.Friend{
-		FriendID:     r.PathValue("friend_id"),
+		FriendID:     r.PathValue("friendId"),
 		UserRelation: req.UserRelation,
 		Name:         req.Name,
 		Gender:       domain.Gender(req.Gender),
@@ -129,12 +131,12 @@ func (h *FriendHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Summary     Listar amigos do usuário
 // @Tags        friends
 // @Produce     json
-// @Param       user_id path string true "ID do usuário"
+// @Param       userId path string true "ID do usuário"
 // @Success     200 {array}  domain.Friend
-// @Failure     500 {object} map[string]string
-// @Router      /users/{user_id}/friends [get]
+// @Failure     500 {object} ErrorResponse
+// @Router      /users/{userId}/friends [get]
 func (h *FriendHandler) ListByUserID(w http.ResponseWriter, r *http.Request) {
-	userID := r.PathValue("user_id")
+	userID := r.PathValue("userId")
 	friends, err := h.repo.ListByUserID(r.Context(), userID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not list friends", err)
@@ -147,13 +149,13 @@ func (h *FriendHandler) ListByUserID(w http.ResponseWriter, r *http.Request) {
 // @Summary     Buscar amigo
 // @Tags        friends
 // @Produce     json
-// @Param       friend_id path string true "ID do amigo"
+// @Param       friendId path string true "ID do amigo"
 // @Success     200 {object} domain.Friend
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /friends/{friend_id} [get]
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /friends/{friendId} [get]
 func (h *FriendHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	friendID := r.PathValue("friend_id")
+	friendID := r.PathValue("friendId")
 	friend, err := h.repo.GetByID(r.Context(), friendID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not fetch friend", err)

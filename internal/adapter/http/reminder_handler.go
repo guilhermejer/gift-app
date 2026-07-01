@@ -14,11 +14,11 @@ type ReminderHandler struct {
 }
 
 type ReminderUpsertRequest struct {
-	UserID    string `json:"userID"`
-	FriendID  string `json:"friendID"`
-	Type      string `json:"type"`
-	TriggerAt string `json:"triggerAt"`
-	Message   string `json:"message"`
+	UserID    string `json:"userID" example:"a3f24e53-0d56-46d9-8ea2-0dbb5f64da8a"`
+	FriendID  string `json:"friendID" example:"9b02ce54-4f42-4a8b-a539-5b53a6e37e63"`
+	Type      string `json:"type" example:"birthday"`
+	TriggerAt string `json:"triggerAt" format:"date" example:"2026-08-15"`
+	Message   string `json:"message" example:"Comprar presente ate uma semana antes"`
 }
 
 func NewReminderHandler(repo port.ReminderRepository) *ReminderHandler {
@@ -27,15 +27,16 @@ func NewReminderHandler(repo port.ReminderRepository) *ReminderHandler {
 
 // Create godoc
 // @Summary     Criar lembrete
+// @Description Exemplo de payload: {"friendID":"9b02ce54-4f42-4a8b-a539-5b53a6e37e63","type":"birthday","triggerAt":"2026-08-15","message":"Comprar presente ate uma semana antes"}. Campo triggerAt no formato YYYY-MM-DD.
 // @Tags        reminders
 // @Accept      json
 // @Produce     json
-// @Param       user_id  path string          true "ID do usuário"
+// @Param       userId  path string          true "ID do usuário"
 // @Param       reminder body ReminderUpsertRequest true "Dados do lembrete"
 // @Success     201 {object} domain.Reminder
-// @Failure     400 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /users/{user_id}/reminders [put]
+// @Failure     400 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /users/{userId}/reminders [put]
 func (h *ReminderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req ReminderUpsertRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -54,7 +55,7 @@ func (h *ReminderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reminder := domain.Reminder{
-		UserID:    r.PathValue("user_id"),
+		UserID:    r.PathValue("userId"),
 		FriendID:  req.FriendID,
 		Type:      req.Type,
 		TriggerAt: triggerAt,
@@ -62,7 +63,7 @@ func (h *ReminderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if reminder.FriendID == "" {
-		writeError(w, http.StatusBadRequest, "friend_id is required", errors.New("friend_id is required"))
+		writeError(w, http.StatusBadRequest, "friendID is required", errors.New("friendID is required"))
 		return
 	}
 
@@ -76,16 +77,17 @@ func (h *ReminderHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // Update godoc
 // @Summary     Atualizar lembrete
+// @Description Exemplo de payload: {"userID":"a3f24e53-0d56-46d9-8ea2-0dbb5f64da8a","friendID":"9b02ce54-4f42-4a8b-a539-5b53a6e37e63","type":"anniversary","triggerAt":"2026-09-20","message":"Enviar flores"}. Campo triggerAt no formato YYYY-MM-DD.
 // @Tags        reminders
 // @Accept      json
 // @Produce     json
-// @Param       reminder_id path string          true "ID do lembrete"
+// @Param       reminderId path string          true "ID do lembrete"
 // @Param       reminder    body ReminderUpsertRequest true "Dados a atualizar"
 // @Success     200 {object} domain.Reminder
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /reminders/{reminder_id} [post]
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /reminders/{reminderId} [post]
 func (h *ReminderHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var req ReminderUpsertRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -104,7 +106,7 @@ func (h *ReminderHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reminder := domain.Reminder{
-		ReminderID: r.PathValue("reminder_id"),
+		ReminderID: r.PathValue("reminderId"),
 		UserID:     req.UserID,
 		FriendID:   req.FriendID,
 		Type:       req.Type,
@@ -128,12 +130,12 @@ func (h *ReminderHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Summary     Listar lembretes do usuário
 // @Tags        reminders
 // @Produce     json
-// @Param       user_id path string true "ID do usuário"
+// @Param       userId path string true "ID do usuário"
 // @Success     200 {array}  domain.Reminder
-// @Failure     500 {object} map[string]string
-// @Router      /users/{user_id}/reminders [get]
+// @Failure     500 {object} ErrorResponse
+// @Router      /users/{userId}/reminders [get]
 func (h *ReminderHandler) ListByUserID(w http.ResponseWriter, r *http.Request) {
-	userID := r.PathValue("user_id")
+	userID := r.PathValue("userId")
 	reminders, err := h.repo.ListByUserID(r.Context(), userID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not list reminders", err)

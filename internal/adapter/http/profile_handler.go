@@ -14,10 +14,11 @@ type ProfileHandler struct {
 }
 
 type ProfileUpsertRequest struct {
-	FriendID  string    `json:"friend_id"`
-	Likes     []string  `json:"likes"`
-	Dislikes  []string  `json:"dislikes"`
-	Embedding []float32 `json:"embedding"`
+	FriendID    string    `json:"friendID" example:"9b02ce54-4f42-4a8b-a539-5b53a6e37e63"`
+	Likes       []string  `json:"likes" example:"fotografia,musica,viagem"`
+	Dislikes    []string  `json:"dislikes" example:"multidoes,atraso"`
+	Personality []string  `json:"personality" example:"introvertida,criativa,detalhista"`
+	Embedding   []float32 `json:"embedding" example:"0.12,-0.44,0.91"`
 }
 
 func NewProfileHandler(repo port.ProfileRepository) *ProfileHandler {
@@ -26,16 +27,17 @@ func NewProfileHandler(repo port.ProfileRepository) *ProfileHandler {
 
 // Save godoc
 // @Summary     Criar ou atualizar perfil do amigo
+// @Description Exemplo de payload: {"friendID":"9b02ce54-4f42-4a8b-a539-5b53a6e37e63","likes":["fotografia","musica","viagem"],"dislikes":["multidoes","atraso"],"personality":["introvertida","criativa"],"embedding":[0.12,-0.44,0.91]}.
 // @Tags        profiles
 // @Accept      json
 // @Produce     json
-// @Param       friend_id path  string         true "ID do amigo"
+// @Param       friendId path  string         true "ID do amigo"
 // @Param       profile   body  ProfileUpsertRequest true "Dados do perfil"
 // @Success     200 {object} domain.Profile
-// @Failure     400 {object} map[string]string
-// @Failure     422 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /friends/{friend_id}/profile [put]
+// @Failure     400 {object} ErrorResponse
+// @Failure     422 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /friends/{friendId}/profile [put]
 func (h *ProfileHandler) Save(w http.ResponseWriter, r *http.Request) {
 	var req ProfileUpsertRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -43,20 +45,21 @@ func (h *ProfileHandler) Save(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pathFriendID := r.PathValue("friend_id")
+	pathFriendID := r.PathValue("friendId")
 	if req.FriendID == "" {
 		req.FriendID = pathFriendID
 	}
 	if req.FriendID != pathFriendID {
-		writeError(w, http.StatusUnprocessableEntity, "friend_id in body must match path parameter", errors.New("friend_id mismatch"))
+		writeError(w, http.StatusUnprocessableEntity, "friendID in body must match path parameter", errors.New("friendID mismatch"))
 		return
 	}
 
 	profile := domain.Profile{
-		FriendID:  req.FriendID,
-		Likes:     req.Likes,
-		Dislikes:  req.Dislikes,
-		Embedding: req.Embedding,
+		FriendID:    req.FriendID,
+		Likes:       req.Likes,
+		Dislikes:    req.Dislikes,
+		Personality: req.Personality,
+		Embedding:   req.Embedding,
 	}
 
 	if err := h.repo.Save(r.Context(), &profile); err != nil {
@@ -70,13 +73,13 @@ func (h *ProfileHandler) Save(w http.ResponseWriter, r *http.Request) {
 // @Summary     Buscar perfil do amigo
 // @Tags        profiles
 // @Produce     json
-// @Param       friend_id path string true "ID do amigo"
+// @Param       friendId path string true "ID do amigo"
 // @Success     200 {object} domain.Profile
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /friends/{friend_id}/profile [get]
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /friends/{friendId}/profile [get]
 func (h *ProfileHandler) GetByFriendID(w http.ResponseWriter, r *http.Request) {
-	friendID := r.PathValue("friend_id")
+	friendID := r.PathValue("friendId")
 	profile, err := h.repo.GetByFriendID(r.Context(), friendID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not fetch profile", err)

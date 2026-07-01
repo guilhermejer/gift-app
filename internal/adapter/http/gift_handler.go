@@ -16,13 +16,13 @@ type GiftHandler struct {
 }
 
 type GiftUpsertRequest struct {
-	FriendID        string   `json:"friendID"`
-	Title           string   `json:"title"`
-	Description     string   `json:"description"`
-	PriceRange      string   `json:"priceRange"`
-	Tags            []string `json:"tags"`
-	OccasionDetails string   `json:"occasionDetails"`
-	ReminderID      string   `json:"reminderID"`
+	FriendID        string   `json:"friendID" example:"9b02ce54-4f42-4a8b-a539-5b53a6e37e63"`
+	Title           string   `json:"title" example:"Livro de fotografia"`
+	Description     string   `json:"description" example:"Edicao especial de fotografia urbana"`
+	PriceRange      string   `json:"priceRange" example:"R$ 120 - R$ 180"`
+	Tags            []string `json:"tags" example:"fotografia,livros,arte"`
+	OccasionDetails string   `json:"occasionDetails" example:"Aniversario em 2026-08-15; gosta de arte visual"`
+	ReminderID      string   `json:"reminderID" example:"d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77"`
 }
 
 func NewGiftHandler(repo port.GiftRepository, friendRepo port.FriendRepository, reminderRepo port.ReminderRepository) *GiftHandler {
@@ -31,17 +31,18 @@ func NewGiftHandler(repo port.GiftRepository, friendRepo port.FriendRepository, 
 
 // Create godoc
 // @Summary     Criar sugestão de presente
+// @Description Exemplo de payload: {"title":"Livro de fotografia","description":"Edicao especial de fotografia urbana","priceRange":"R$ 120 - R$ 180","tags":["fotografia","livros","arte"],"occasionDetails":"Aniversario em 2026-08-15; gosta de arte visual","reminderID":"d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77"}.
 // @Tags        gifts
 // @Accept      json
 // @Produce     json
-// @Param       friend_id path string      true "ID do amigo"
+// @Param       friendId path string      true "ID do amigo"
 // @Param       gift      body GiftUpsertRequest true "Dados do presente"
 // @Success     201 {object} domain.Gift
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     409 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /friends/{friend_id}/gifts [put]
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     409 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /friends/{friendId}/gifts [put]
 func (h *GiftHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req GiftUpsertRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -49,7 +50,7 @@ func (h *GiftHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	friendID := r.PathValue("friend_id")
+	friendID := r.PathValue("friendId")
 	friend, err := h.friendRepo.GetByID(r.Context(), friendID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not validate friend", err)
@@ -105,17 +106,18 @@ func (h *GiftHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // Update godoc
 // @Summary     Atualizar sugestão de presente
+// @Description Exemplo de payload: {"title":"Camera instantanea","description":"Modelo compacto","priceRange":"R$ 300 - R$ 450","tags":["fotografia","tecnologia"],"occasionDetails":"Formatura em 2026-12-10"}.
 // @Tags        gifts
 // @Accept      json
 // @Produce     json
-// @Param       gift_id path string      true "ID do presente"
+// @Param       giftId path string      true "ID do presente"
 // @Param       gift    body GiftUpsertRequest true "Dados a atualizar"
 // @Success     200 {object} domain.Gift
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     409 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /gifts/{gift_id} [post]
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     409 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /gifts/{giftId} [post]
 func (h *GiftHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var req GiftUpsertRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -123,7 +125,7 @@ func (h *GiftHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	giftID := r.PathValue("gift_id")
+	giftID := r.PathValue("giftId")
 	existing, err := h.repo.GetByID(r.Context(), giftID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not validate gift", err)
@@ -193,12 +195,12 @@ func (h *GiftHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Summary     Listar sugestões de presente
 // @Tags        gifts
 // @Produce     json
-// @Param       friend_id path string true "ID do amigo"
+// @Param       friendId path string true "ID do amigo"
 // @Success     200 {array}  domain.Gift
-// @Failure     500 {object} map[string]string
-// @Router      /friends/{friend_id}/gifts [get]
+// @Failure     500 {object} ErrorResponse
+// @Router      /friends/{friendId}/gifts [get]
 func (h *GiftHandler) ListByFriendID(w http.ResponseWriter, r *http.Request) {
-	friendID := r.PathValue("friend_id")
+	friendID := r.PathValue("friendId")
 	gifts, err := h.repo.ListByFriendID(r.Context(), friendID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not list gifts", err)

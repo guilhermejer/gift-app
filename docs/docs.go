@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/friends/{friend_id}": {
+        "/friends/{friendId}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -28,7 +28,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do amigo",
-                        "name": "friend_id",
+                        "name": "friendId",
                         "in": "path",
                         "required": true
                     }
@@ -43,24 +43,19 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             },
             "post": {
+                "description": "Exemplo de payload: {\"userRelation\":\"prima\",\"name\":\"Mariana Souza\",\"gender\":\"female\",\"birthDate\":\"1994-10-03\",\"city\":\"Curitiba\"}. Campo birthDate no formato YYYY-MM-DD.",
                 "consumes": [
                     "application/json"
                 ],
@@ -75,7 +70,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do amigo",
-                        "name": "friend_id",
+                        "name": "friendId",
                         "in": "path",
                         "required": true
                     },
@@ -99,34 +94,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/friends/{friend_id}/gifts": {
+        "/friends/{friendId}/gifts": {
             "get": {
                 "produces": [
                     "application/json"
@@ -139,7 +125,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do amigo",
-                        "name": "friend_id",
+                        "name": "friendId",
                         "in": "path",
                         "required": true
                     }
@@ -157,15 +143,13 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             },
             "put": {
+                "description": "Exemplo de payload: {\"title\":\"Livro de fotografia\",\"description\":\"Edicao especial de fotografia urbana\",\"priceRange\":\"R$ 120 - R$ 180\",\"tags\":[\"fotografia\",\"livros\",\"arte\"],\"occasionDetails\":\"Aniversario em 2026-08-15; gosta de arte visual\",\"reminderID\":\"d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77\"}.",
                 "consumes": [
                     "application/json"
                 ],
@@ -180,7 +164,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do amigo",
-                        "name": "friend_id",
+                        "name": "friendId",
                         "in": "path",
                         "required": true
                     },
@@ -204,43 +188,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/friends/{friend_id}/profile": {
+        "/friends/{friendId}/profile": {
             "get": {
                 "produces": [
                     "application/json"
@@ -253,7 +225,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do amigo",
-                        "name": "friend_id",
+                        "name": "friendId",
                         "in": "path",
                         "required": true
                     }
@@ -268,24 +240,19 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             },
             "put": {
+                "description": "Exemplo de payload: {\"friendID\":\"9b02ce54-4f42-4a8b-a539-5b53a6e37e63\",\"likes\":[\"fotografia\",\"musica\",\"viagem\"],\"dislikes\":[\"multidoes\",\"atraso\"],\"personality\":[\"introvertida\",\"criativa\"],\"embedding\":[0.12,-0.44,0.91]}.",
                 "consumes": [
                     "application/json"
                 ],
@@ -300,7 +267,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do amigo",
-                        "name": "friend_id",
+                        "name": "friendId",
                         "in": "path",
                         "required": true
                     },
@@ -324,35 +291,27 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/gifts/{gift_id}": {
+        "/gifts/{giftId}": {
             "post": {
+                "description": "Exemplo de payload: {\"title\":\"Camera instantanea\",\"description\":\"Modelo compacto\",\"priceRange\":\"R$ 300 - R$ 450\",\"tags\":[\"fotografia\",\"tecnologia\"],\"occasionDetails\":\"Formatura em 2026-12-10\"}.",
                 "consumes": [
                     "application/json"
                 ],
@@ -367,7 +326,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do presente",
-                        "name": "gift_id",
+                        "name": "giftId",
                         "in": "path",
                         "required": true
                     },
@@ -391,37 +350,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
@@ -429,6 +376,7 @@ const docTemplate = `{
         },
         "/profiles/agent/chat": {
             "post": {
+                "description": "Exemplo de payload: {\"friendID\":\"9b02ce54-4f42-4a8b-a539-5b53a6e37e63\",\"message\":\"Ela prefere experiencias ou objetos?\"}.",
                 "consumes": [
                     "application/json"
                 ],
@@ -461,28 +409,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
@@ -490,6 +429,7 @@ const docTemplate = `{
         },
         "/profiles/agent/finalize": {
             "post": {
+                "description": "Exemplo de payload: {\"friendID\":\"9b02ce54-4f42-4a8b-a539-5b53a6e37e63\"}.",
                 "consumes": [
                     "application/json"
                 ],
@@ -522,34 +462,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/profiles/agent/session/{friend_id}": {
+        "/profiles/agent/session/{friendId}": {
             "delete": {
                 "produces": [
                     "application/json"
@@ -562,7 +493,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do friend",
-                        "name": "friend_id",
+                        "name": "friendId",
                         "in": "path",
                         "required": true
                     }
@@ -578,35 +509,27 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/profiles/{friend_id}/suggestions": {
+        "/profiles/{friendId}/suggestions": {
             "post": {
+                "description": "Exemplo de payload: {\"occasionDetails\":\"Aniversario em 2026-08-15, prefere experiencias ao ar livre\",\"reminderID\":\"d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77\"}.",
                 "consumes": [
                     "application/json"
                 ],
@@ -621,7 +544,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do friend",
-                        "name": "friend_id",
+                        "name": "friendId",
                         "in": "path",
                         "required": true
                     },
@@ -646,44 +569,33 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/reminders/{reminder_id}": {
+        "/reminders/{reminderId}": {
             "post": {
+                "description": "Exemplo de payload: {\"userID\":\"a3f24e53-0d56-46d9-8ea2-0dbb5f64da8a\",\"friendID\":\"9b02ce54-4f42-4a8b-a539-5b53a6e37e63\",\"type\":\"anniversary\",\"triggerAt\":\"2026-09-20\",\"message\":\"Enviar flores\"}. Campo triggerAt no formato YYYY-MM-DD.",
                 "consumes": [
                     "application/json"
                 ],
@@ -698,7 +610,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do lembrete",
-                        "name": "reminder_id",
+                        "name": "reminderId",
                         "in": "path",
                         "required": true
                     },
@@ -722,28 +634,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
@@ -751,6 +654,7 @@ const docTemplate = `{
         },
         "/suggestions/agent/chat": {
             "post": {
+                "description": "Exemplo de payload: {\"giftID\":\"77a6f2b8-78f4-4cc3-bcc8-1e7f2499abf0\",\"message\":\"Pode sugerir uma opcao mais economica?\"}.",
                 "consumes": [
                     "application/json"
                 ],
@@ -783,28 +687,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
@@ -812,6 +707,7 @@ const docTemplate = `{
         },
         "/suggestions/agent/finalize": {
             "post": {
+                "description": "Exemplo de payload: {\"giftID\":\"77a6f2b8-78f4-4cc3-bcc8-1e7f2499abf0\"}.",
                 "consumes": [
                     "application/json"
                 ],
@@ -844,28 +740,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
@@ -873,6 +760,7 @@ const docTemplate = `{
         },
         "/users": {
             "put": {
+                "description": "Exemplo de payload: {\"fullName\":\"Ana Souza\",\"email\":\"ana.souza@email.com\",\"active\":true,\"planId\":\"basic\",\"birthDate\":\"1992-07-21\",\"city\":\"Sao Paulo\"}. Campo birthDate no formato YYYY-MM-DD.",
                 "consumes": [
                     "application/json"
                 ],
@@ -904,28 +792,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
@@ -959,34 +838,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/users/{user_id}": {
+        "/users/{userId}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -999,7 +869,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do usuário",
-                        "name": "user_id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }
@@ -1014,24 +884,19 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             },
             "post": {
+                "description": "Exemplo de payload: {\"fullName\":\"Ana Souza\",\"email\":\"ana.novo@email.com\",\"active\":true,\"planId\":\"pro\",\"birthDate\":\"1992-07-21\",\"city\":\"Campinas\"}. Campo birthDate no formato YYYY-MM-DD.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1046,7 +911,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do usuário",
-                        "name": "user_id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     },
@@ -1070,43 +935,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/users/{user_id}/friends": {
+        "/users/{userId}/friends": {
             "get": {
                 "produces": [
                     "application/json"
@@ -1119,7 +972,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do usuário",
-                        "name": "user_id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }
@@ -1137,15 +990,13 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             },
             "put": {
+                "description": "Exemplo de payload: {\"userRelation\":\"irma\",\"name\":\"Mariana Souza\",\"gender\":\"female\",\"birthDate\":\"1994-10-03\",\"city\":\"Belo Horizonte\"}. Campo birthDate no formato YYYY-MM-DD.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1160,7 +1011,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do usuário",
-                        "name": "user_id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     },
@@ -1184,25 +1035,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/users/{user_id}/reminders": {
+        "/users/{userId}/reminders": {
             "get": {
                 "produces": [
                     "application/json"
@@ -1215,7 +1060,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do usuário",
-                        "name": "user_id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }
@@ -1233,15 +1078,13 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
             },
             "put": {
+                "description": "Exemplo de payload: {\"friendID\":\"9b02ce54-4f42-4a8b-a539-5b53a6e37e63\",\"type\":\"birthday\",\"triggerAt\":\"2026-08-15\",\"message\":\"Comprar presente ate uma semana antes\"}. Campo triggerAt no formato YYYY-MM-DD.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1256,7 +1099,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID do usuário",
-                        "name": "user_id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     },
@@ -1280,19 +1123,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
@@ -1304,28 +1141,40 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "birthDate": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "1994-10-03T00:00:00Z"
                 },
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Belo Horizonte"
                 },
                 "friendID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "9b02ce54-4f42-4a8b-a539-5b53a6e37e63"
                 },
                 "gender": {
-                    "$ref": "#/definitions/domain.Gender"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.Gender"
+                        }
+                    ],
+                    "example": "female"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Mariana Souza"
                 },
                 "profile": {
                     "$ref": "#/definitions/domain.Profile"
                 },
                 "userID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "5581a365-394f-467d-ae13-0d01e4cf1863"
                 },
                 "userRelation": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "irma"
                 }
             }
         },
@@ -1397,6 +1246,12 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "personality": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -1404,22 +1259,29 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "friendID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "9b02ce54-4f42-4a8b-a539-5b53a6e37e63"
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Comprar presente ate uma semana antes"
                 },
                 "reminderID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77"
                 },
                 "triggerAt": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-08-15T00:00:00Z"
                 },
                 "type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "birthday"
                 },
                 "userID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "5581a365-394f-467d-ae13-0d01e4cf1863"
                 }
             }
         },
@@ -1427,44 +1289,64 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "active": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 },
                 "birthDate": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "1999-03-16T00:00:00Z"
                 },
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Santo Andre"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "guilherme.jer1@gmail.com"
                 },
                 "fullName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Guilherme Jeronymo"
                 },
                 "planID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": ""
                 },
                 "userID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "5581a365-394f-467d-ae13-0d01e4cf1863"
                 }
             }
         },
         "http.AgentChatRequest": {
             "type": "object",
             "properties": {
-                "friend_id": {
-                    "type": "string"
+                "friendID": {
+                    "type": "string",
+                    "example": "9b02ce54-4f42-4a8b-a539-5b53a6e37e63"
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Ela prefere experiencias ou objetos?"
                 }
             }
         },
         "http.AgentFinalizeRequest": {
             "type": "object",
             "properties": {
-                "friend_id": {
-                    "type": "string"
+                "friendID": {
+                    "type": "string",
+                    "example": "9b02ce54-4f42-4a8b-a539-5b53a6e37e63"
+                }
+            }
+        },
+        "http.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "birthDate must be in format YYYY-MM-DD"
                 }
             }
         },
@@ -1472,19 +1354,25 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "birthDate": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date",
+                    "example": "1994-10-03"
                 },
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Belo Horizonte"
                 },
                 "gender": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "female"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Mariana Souza"
                 },
                 "userRelation": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "irma"
                 }
             }
         },
@@ -1492,28 +1380,39 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Edicao especial de fotografia urbana"
                 },
                 "friendID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "9b02ce54-4f42-4a8b-a539-5b53a6e37e63"
                 },
                 "occasionDetails": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Aniversario em 2026-08-15; gosta de arte visual"
                 },
                 "priceRange": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "R$ 120 - R$ 180"
                 },
                 "reminderID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77"
                 },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "fotografia",
+                        "livros",
+                        "arte"
+                    ]
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Livro de fotografia"
                 }
             }
         },
@@ -1524,22 +1423,48 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "multidoes",
+                        "atraso"
+                    ]
                 },
                 "embedding": {
                     "type": "array",
                     "items": {
                         "type": "number"
-                    }
+                    },
+                    "example": [
+                        0.12,
+                        -0.44,
+                        0.91
+                    ]
                 },
-                "friend_id": {
-                    "type": "string"
+                "friendID": {
+                    "type": "string",
+                    "example": "9b02ce54-4f42-4a8b-a539-5b53a6e37e63"
                 },
                 "likes": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "fotografia",
+                        "musica",
+                        "viagem"
+                    ]
+                },
+                "personality": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "introvertida",
+                        "criativa",
+                        "detalhista"
+                    ]
                 }
             }
         },
@@ -1547,49 +1472,60 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "friendID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "9b02ce54-4f42-4a8b-a539-5b53a6e37e63"
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Comprar presente ate uma semana antes"
                 },
                 "triggerAt": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date",
+                    "example": "2026-08-15"
                 },
                 "type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "birthday"
                 },
                 "userID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "a3f24e53-0d56-46d9-8ea2-0dbb5f64da8a"
                 }
             }
         },
         "http.SuggestionChatRequest": {
             "type": "object",
             "properties": {
-                "gift_id": {
-                    "type": "string"
+                "giftID": {
+                    "type": "string",
+                    "example": "77a6f2b8-78f4-4cc3-bcc8-1e7f2499abf0"
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Pode sugerir uma opcao mais economica?"
                 }
             }
         },
         "http.SuggestionCreateRequest": {
             "type": "object",
             "properties": {
-                "occasion_details": {
-                    "type": "string"
+                "occasionDetails": {
+                    "type": "string",
+                    "example": "Aniversario em 2026-08-15, prefere experiencias ao ar livre"
                 },
-                "reminder_id": {
-                    "type": "string"
+                "reminderID": {
+                    "type": "string",
+                    "example": "d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77"
                 }
             }
         },
         "http.SuggestionFinalizeRequest": {
             "type": "object",
             "properties": {
-                "gift_id": {
-                    "type": "string"
+                "giftID": {
+                    "type": "string",
+                    "example": "77a6f2b8-78f4-4cc3-bcc8-1e7f2499abf0"
                 }
             }
         },
@@ -1597,22 +1533,29 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "active": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 },
                 "birthDate": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date",
+                    "example": "1992-07-21"
                 },
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Sao Paulo"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "ana.souza@email.com"
                 },
                 "fullName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Ana Souza"
                 },
                 "planId": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "basic"
                 }
             }
         }

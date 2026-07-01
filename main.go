@@ -69,34 +69,34 @@ func main() {
 	// Users
 	mux.HandleFunc("PUT /users", userHandler.Create)
 	mux.HandleFunc("GET /users/email", userHandler.GetByEmail)
-	mux.HandleFunc("GET /users/{user_id}", userHandler.GetByID)
-	mux.HandleFunc("POST /users/{user_id}", userHandler.Update)
+	mux.HandleFunc("GET /users/{userId}", userHandler.GetByID)
+	mux.HandleFunc("POST /users/{userId}", userHandler.Update)
 
 	// Friends
-	mux.HandleFunc("PUT /users/{user_id}/friends", friendHandler.Create)
-	mux.HandleFunc("GET /users/{user_id}/friends", friendHandler.ListByUserID)
-	mux.HandleFunc("GET /friends/{friend_id}", friendHandler.GetByID)
-	mux.HandleFunc("POST /friends/{friend_id}", friendHandler.Update)
+	mux.HandleFunc("PUT /users/{userId}/friends", friendHandler.Create)
+	mux.HandleFunc("GET /users/{userId}/friends", friendHandler.ListByUserID)
+	mux.HandleFunc("GET /friends/{friendId}", friendHandler.GetByID)
+	mux.HandleFunc("POST /friends/{friendId}", friendHandler.Update)
 
 	// Profiles
-	mux.HandleFunc("PUT /friends/{friend_id}/profile", profileHandler.Save)
-	mux.HandleFunc("GET /friends/{friend_id}/profile", profileHandler.GetByFriendID)
+	mux.HandleFunc("PUT /friends/{friendId}/profile", profileHandler.Save)
+	mux.HandleFunc("GET /friends/{friendId}/profile", profileHandler.GetByFriendID)
 	mux.HandleFunc("POST /profiles/agent/chat", profileAgentHandler.Chat)
 	mux.HandleFunc("POST /profiles/agent/finalize", profileAgentHandler.Finalize)
-	mux.HandleFunc("DELETE /profiles/agent/session/{friend_id}", profileAgentHandler.DeleteSession)
-	mux.HandleFunc("POST /profiles/{friend_id}/suggestions", suggestionAgentHandler.Create)
+	mux.HandleFunc("DELETE /profiles/agent/session/{friendId}", profileAgentHandler.DeleteSession)
+	mux.HandleFunc("POST /profiles/{friendId}/suggestions", suggestionAgentHandler.Create)
 	mux.HandleFunc("POST /suggestions/agent/chat", suggestionAgentHandler.Chat)
 	mux.HandleFunc("POST /suggestions/agent/finalize", suggestionAgentHandler.Finalize)
 
 	// Gifts
-	mux.HandleFunc("PUT /friends/{friend_id}/gifts", giftHandler.Create)
-	mux.HandleFunc("GET /friends/{friend_id}/gifts", giftHandler.ListByFriendID)
-	mux.HandleFunc("POST /gifts/{gift_id}", giftHandler.Update)
+	mux.HandleFunc("PUT /friends/{friendId}/gifts", giftHandler.Create)
+	mux.HandleFunc("GET /friends/{friendId}/gifts", giftHandler.ListByFriendID)
+	mux.HandleFunc("POST /gifts/{giftId}", giftHandler.Update)
 
 	// Reminders
-	mux.HandleFunc("PUT /users/{user_id}/reminders", reminderHandler.Create)
-	mux.HandleFunc("GET /users/{user_id}/reminders", reminderHandler.ListByUserID)
-	mux.HandleFunc("POST /reminders/{reminder_id}", reminderHandler.Update)
+	mux.HandleFunc("PUT /users/{userId}/reminders", reminderHandler.Create)
+	mux.HandleFunc("GET /users/{userId}/reminders", reminderHandler.ListByUserID)
+	mux.HandleFunc("POST /reminders/{reminderId}", reminderHandler.Update)
 
 	handler := httpadapter.LoggingMiddleware(mux)
 

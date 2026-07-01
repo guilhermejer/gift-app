@@ -17,17 +17,17 @@ type SuggestionAgentHandler struct {
 }
 
 type SuggestionCreateRequest struct {
-	OccasionDetails string `json:"occasion_details"`
-	ReminderID      string `json:"reminder_id,omitempty"`
+	OccasionDetails string `json:"occasionDetails" example:"Aniversario em 2026-08-15, prefere experiencias ao ar livre"`
+	ReminderID      string `json:"reminderID,omitempty" example:"d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77"`
 }
 
 type SuggestionChatRequest struct {
-	GiftID  string `json:"gift_id"`
-	Message string `json:"message"`
+	GiftID  string `json:"giftID" example:"77a6f2b8-78f4-4cc3-bcc8-1e7f2499abf0"`
+	Message string `json:"message" example:"Pode sugerir uma opcao mais economica?"`
 }
 
 type SuggestionFinalizeRequest struct {
-	GiftID string `json:"gift_id"`
+	GiftID string `json:"giftID" example:"77a6f2b8-78f4-4cc3-bcc8-1e7f2499abf0"`
 }
 
 func NewSuggestionAgentHandler(
@@ -46,25 +46,26 @@ func NewSuggestionAgentHandler(
 
 // Create godoc
 // @Summary     Criar sugestão inicial para friend
+// @Description Exemplo de payload: {"occasionDetails":"Aniversario em 2026-08-15, prefere experiencias ao ar livre","reminderID":"d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77"}.
 // @Tags        suggestion-agent
 // @Accept      json
 // @Produce     json
-// @Param       friend_id path string true "ID do friend"
+// @Param       friendId path string true "ID do friend"
 // @Param       payload body SuggestionCreateRequest true "Dados da ocasião"
 // @Success     200 {object} map[string]any
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     409 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /profiles/{friend_id}/suggestions [post]
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     409 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /profiles/{friendId}/suggestions [post]
 func (h *SuggestionAgentHandler) Create(w http.ResponseWriter, r *http.Request) {
-	friendID := r.PathValue("friend_id")
+	friendID := r.PathValue("friendId")
 	if friendID == "" {
-		writeError(w, http.StatusBadRequest, "friend_id is required", errors.New("missing friend_id"))
+		writeError(w, http.StatusBadRequest, "friendId is required", errors.New("missing friendId"))
 		return
 	}
 	if !uuidPattern.MatchString(friendID) {
-		writeError(w, http.StatusBadRequest, "friend_id must be a valid UUID", errors.New("invalid friend_id"))
+		writeError(w, http.StatusBadRequest, "friendId must be a valid UUID", errors.New("invalid friendId"))
 		return
 	}
 
@@ -74,11 +75,11 @@ func (h *SuggestionAgentHandler) Create(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	if req.OccasionDetails == "" {
-		writeError(w, http.StatusBadRequest, "occasion_details is required", errors.New("missing occasion_details"))
+		writeError(w, http.StatusBadRequest, "occasionDetails is required", errors.New("missing occasionDetails"))
 		return
 	}
 	if req.ReminderID != "" && !uuidPattern.MatchString(req.ReminderID) {
-		writeError(w, http.StatusBadRequest, "reminder_id must be a valid UUID", errors.New("invalid reminder_id"))
+		writeError(w, http.StatusBadRequest, "reminderID must be a valid UUID", errors.New("invalid reminderID"))
 		return
 	}
 
@@ -119,14 +120,15 @@ func (h *SuggestionAgentHandler) Create(w http.ResponseWriter, r *http.Request) 
 
 // Chat godoc
 // @Summary     Conversar para refinar sugestão por gift
+// @Description Exemplo de payload: {"giftID":"77a6f2b8-78f4-4cc3-bcc8-1e7f2499abf0","message":"Pode sugerir uma opcao mais economica?"}.
 // @Tags        suggestion-agent
 // @Accept      json
 // @Produce     json
 // @Param       payload body SuggestionChatRequest true "Payload do chat"
 // @Success     200 {object} map[string]any
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
 // @Router      /suggestions/agent/chat [post]
 func (h *SuggestionAgentHandler) Chat(w http.ResponseWriter, r *http.Request) {
 	var req SuggestionChatRequest
@@ -136,7 +138,7 @@ func (h *SuggestionAgentHandler) Chat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.GiftID == "" || req.Message == "" {
-		writeError(w, http.StatusBadRequest, "gift_id and message are required", errors.New("missing required fields"))
+		writeError(w, http.StatusBadRequest, "giftID and message are required", errors.New("missing required fields"))
 		return
 	}
 
@@ -161,14 +163,15 @@ func (h *SuggestionAgentHandler) Chat(w http.ResponseWriter, r *http.Request) {
 
 // Finalize godoc
 // @Summary     Finalizar refinamento de sugestão por gift
+// @Description Exemplo de payload: {"giftID":"77a6f2b8-78f4-4cc3-bcc8-1e7f2499abf0"}.
 // @Tags        suggestion-agent
 // @Accept      json
 // @Produce     json
 // @Param       payload body SuggestionFinalizeRequest true "Payload de finalização"
 // @Success     200 {object} map[string]any
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
 // @Router      /suggestions/agent/finalize [post]
 func (h *SuggestionAgentHandler) Finalize(w http.ResponseWriter, r *http.Request) {
 	var req SuggestionFinalizeRequest
@@ -178,7 +181,7 @@ func (h *SuggestionAgentHandler) Finalize(w http.ResponseWriter, r *http.Request
 	}
 
 	if req.GiftID == "" {
-		writeError(w, http.StatusBadRequest, "gift_id is required", errors.New("missing gift_id"))
+		writeError(w, http.StatusBadRequest, "giftID is required", errors.New("missing giftID"))
 		return
 	}
 

@@ -16,12 +16,12 @@ type UserHandler struct {
 }
 
 type UserUpsertRequest struct {
-	FullName  string `json:"fullName"`
-	Email     string `json:"email"`
-	Active    bool   `json:"active"`
-	PlanID    string `json:"planId"`
-	BirthDate string `json:"birthDate"`
-	City      string `json:"city"`
+	FullName  string `json:"fullName" example:"Ana Souza"`
+	Email     string `json:"email" example:"ana.souza@email.com"`
+	Active    bool   `json:"active" example:"true"`
+	PlanID    string `json:"planId" example:"basic"`
+	BirthDate string `json:"birthDate" format:"date" example:"1992-07-21"`
+	City      string `json:"city" example:"Sao Paulo"`
 }
 
 func NewUserHandler(repo port.UserRepository) *UserHandler {
@@ -30,14 +30,15 @@ func NewUserHandler(repo port.UserRepository) *UserHandler {
 
 // Create godoc
 // @Summary     Criar usuário
+// @Description Exemplo de payload: {"fullName":"Ana Souza","email":"ana.souza@email.com","active":true,"planId":"basic","birthDate":"1992-07-21","city":"Sao Paulo"}. Campo birthDate no formato YYYY-MM-DD.
 // @Tags        users
 // @Accept      json
 // @Produce     json
 // @Param       user body UserUpsertRequest true "Dados do usuário"
 // @Success     201 {object} domain.User
-// @Failure     400 {object} map[string]string
-// @Failure     409 {object} map[string]string
-// @Failure     500 {object} map[string]string
+// @Failure     400 {object} ErrorResponse
+// @Failure     409 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
 // @Router      /users [put]
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req UserUpsertRequest
@@ -79,17 +80,18 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // Update godoc
 // @Summary     Atualizar usuário
+// @Description Exemplo de payload: {"fullName":"Ana Souza","email":"ana.novo@email.com","active":true,"planId":"pro","birthDate":"1992-07-21","city":"Campinas"}. Campo birthDate no formato YYYY-MM-DD.
 // @Tags        users
 // @Accept      json
 // @Produce     json
-// @Param       user_id path string      true "ID do usuário"
+// @Param       userId path string      true "ID do usuário"
 // @Param       user    body UserUpsertRequest true "Dados a atualizar"
 // @Success     200 {object} domain.User
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     409 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /users/{user_id} [post]
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     409 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /users/{userId} [post]
 func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var req UserUpsertRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -108,7 +110,7 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := domain.User{
-		UserID:    r.PathValue("user_id"),
+		UserID:    r.PathValue("userId"),
 		FullName:  req.FullName,
 		Email:     req.Email,
 		Active:    req.Active,
@@ -137,13 +139,13 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Summary     Buscar usuário
 // @Tags        users
 // @Produce     json
-// @Param       user_id path string true "ID do usuário"
+// @Param       userId path string true "ID do usuário"
 // @Success     200 {object} domain.User
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
-// @Router      /users/{user_id} [get]
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /users/{userId} [get]
 func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	userID := r.PathValue("user_id")
+	userID := r.PathValue("userId")
 	user, err := h.repo.GetByID(r.Context(), userID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not fetch user", err)
@@ -162,9 +164,9 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 // @Produce     json
 // @Param       email query string true "Email do usuário"
 // @Success     200 {object} domain.User
-// @Failure     400 {object} map[string]string
-// @Failure     404 {object} map[string]string
-// @Failure     500 {object} map[string]string
+// @Failure     400 {object} ErrorResponse
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
 // @Router      /users/email [get]
 func (h *UserHandler) GetByEmail(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(r.URL.Query().Get("email"))

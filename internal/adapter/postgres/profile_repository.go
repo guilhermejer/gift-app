@@ -27,27 +27,28 @@ func (r *ProfileRepository) Save(ctx context.Context, profile *domain.Profile) e
 	}
 
 	_, err := r.pool.Exec(ctx, `
-		INSERT INTO giftowner.profiles (friend_id, likes, dislikes, embedding)
-		VALUES ($1, $2, $3, $4::vector)
+		INSERT INTO giftowner.profiles (friend_id, likes, dislikes, personality, embedding)
+		VALUES ($1, $2, $3, $4, $5::vector)
 		ON CONFLICT (friend_id) DO UPDATE
 		    SET likes     = EXCLUDED.likes,
 		        dislikes  = EXCLUDED.dislikes,
+		        personality = EXCLUDED.personality,
 		        embedding = EXCLUDED.embedding,
 		        updated_at = now()
-	`, profile.FriendID, profile.Likes, profile.Dislikes, embedding)
+	`, profile.FriendID, profile.Likes, profile.Dislikes, profile.Personality, embedding)
 	return err
 }
 
 func (r *ProfileRepository) GetByFriendID(ctx context.Context, friendID string) (*domain.Profile, error) {
 	row := r.pool.QueryRow(ctx, `
-		SELECT friend_id, likes, dislikes, embedding::text
+		SELECT friend_id, likes, dislikes, personality, embedding::text
 		FROM giftowner.profiles
 		WHERE friend_id = $1
 	`, friendID)
 
 	var p domain.Profile
 	var embeddingText *string
-	err := row.Scan(&p.FriendID, &p.Likes, &p.Dislikes, &embeddingText)
+	err := row.Scan(&p.FriendID, &p.Likes, &p.Dislikes, &p.Personality, &embeddingText)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
