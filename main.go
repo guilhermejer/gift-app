@@ -14,6 +14,7 @@ import (
 	"time"
 
 	_ "github.com/gift-app/api/docs"
+	"github.com/gift-app/api/internal/adapter/gcsstorage"
 	httpadapter "github.com/gift-app/api/internal/adapter/http"
 	"github.com/gift-app/api/internal/adapter/llmapi"
 	"github.com/gift-app/api/internal/adapter/postgres"
@@ -40,6 +41,11 @@ func main() {
 	userHandler := httpadapter.NewUserHandler(postgres.NewUserRepository(pool))
 	friendHandler := httpadapter.NewFriendHandler(postgres.NewFriendRepository(pool))
 	profileHandler := httpadapter.NewProfileHandler(postgres.NewProfileRepository(pool))
+	profilePhotoStorage, err := gcsstorage.NewSignedURLServiceFromEnv(context.Background())
+	if err != nil {
+		log.Fatalf("could not initialize GCS signed url service: %v", err)
+	}
+	profilePhotoHandler := httpadapter.NewProfilePhotoHandler(postgres.NewFriendRepository(pool), profilePhotoStorage)
 	profileAgentHandler := httpadapter.NewProfileAgentHandler(
 		newLLMClientFromEnv(),
 		postgres.NewFriendRepository(pool),
@@ -81,6 +87,10 @@ func main() {
 	// Profiles
 	mux.HandleFunc("PUT /friends/{friendId}/profile", profileHandler.Save)
 	mux.HandleFunc("GET /friends/{friendId}/profile", profileHandler.GetByFriendID)
+	mux.HandleFunc("POST /friends/{friendId}/profile-photo/upload-url", profilePhotoHandler.CreateUploadURL)
+	mux.HandleFunc("POST /friends/{friendId}/profile-photo/update-url", profilePhotoHandler.CreateUpdateURL)
+	mux.HandleFunc("POST /friends/{friendId}/profile-photo/get-url", profilePhotoHandler.CreateGetURL)
+	mux.HandleFunc("POST /friends/{friendId}/profile-photo/delete-url", profilePhotoHandler.CreateDeleteURL)
 	mux.HandleFunc("POST /profiles/agent/chat", profileAgentHandler.Chat)
 	mux.HandleFunc("POST /profiles/agent/finalize", profileAgentHandler.Finalize)
 	mux.HandleFunc("DELETE /profiles/agent/session/{friendId}", profileAgentHandler.DeleteSession)

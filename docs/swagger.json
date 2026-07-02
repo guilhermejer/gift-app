@@ -49,7 +49,7 @@
                 }
             },
             "post": {
-                "description": "Exemplo de payload: {\"userRelation\":\"prima\",\"name\":\"Mariana Souza\",\"gender\":\"female\",\"birthDate\":\"1994-10-03\",\"city\":\"Curitiba\"}. Campo birthDate no formato YYYY-MM-DD.",
+                "description": "Exemplo de payload: {\"userRelation\":\"prima\",\"name\":\"Mariana Souza\",\"avatar\":\"🎨\",\"gender\":\"female\",\"birthDate\":\"1994-10-03\",\"city\":\"Curitiba\"}. Campo birthDate no formato YYYY-MM-DD.",
                 "consumes": [
                     "application/json"
                 ],
@@ -290,6 +290,232 @@
                     },
                     "422": {
                         "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/friends/{friendId}/profile-photo/delete-url": {
+            "post": {
+                "description": "O front deve usar a URL retornada com o metodo DELETE. Se objectName nao for enviado, usa friends/{friendId}/profile-photo.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile-photos"
+                ],
+                "summary": "Gerar URL assinada para remover a foto do amigo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do amigo",
+                        "name": "friendId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.ProfilePhotoSignedURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/friends/{friendId}/profile-photo/get-url": {
+            "post": {
+                "description": "O front deve usar a URL retornada com o metodo GET para obter a foto. Se objectName nao for enviado, usa friends/{friendId}/profile-photo.jpg.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile-photos"
+                ],
+                "summary": "Gerar URL assinada para leitura da foto do amigo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do amigo",
+                        "name": "friendId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Opcional: objectName especifico",
+                        "name": "payload",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/http.ProfilePhotoSignedURLRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.ProfilePhotoSignedURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/friends/{friendId}/profile-photo/update-url": {
+            "post": {
+                "description": "O front deve usar a URL retornada com o metodo PUT. Se objectName nao for enviado, usa friends/{friendId}/profile-photo.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile-photos"
+                ],
+                "summary": "Gerar URL assinada para atualizar a foto do amigo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do amigo",
+                        "name": "friendId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados do arquivo",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.ProfilePhotoSignedURLRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.ProfilePhotoSignedURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/friends/{friendId}/profile-photo/upload-url": {
+            "post": {
+                "description": "O front deve usar a URL retornada com o metodo PUT. Se objectName nao for enviado, usa friends/{friendId}/profile-photo.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile-photos"
+                ],
+                "summary": "Gerar URL assinada para upload da foto do amigo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do amigo",
+                        "name": "friendId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados do arquivo",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.ProfilePhotoSignedURLRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.ProfilePhotoSignedURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/http.ErrorResponse"
                         }
@@ -990,7 +1216,7 @@
                 }
             },
             "put": {
-                "description": "Exemplo de payload: {\"userRelation\":\"irma\",\"name\":\"Mariana Souza\",\"gender\":\"female\",\"birthDate\":\"1994-10-03\",\"city\":\"Belo Horizonte\"}. Campo birthDate no formato YYYY-MM-DD.",
+                "description": "Exemplo de payload: {\"userRelation\":\"irma\",\"name\":\"Mariana Souza\",\"avatar\":\"🧑‍💻\",\"gender\":\"female\",\"birthDate\":\"1994-10-03\",\"city\":\"Belo Horizonte\"}. Campo birthDate no formato YYYY-MM-DD.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1134,6 +1360,10 @@
         "domain.Friend": {
             "type": "object",
             "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "🧑‍💻"
+                },
                 "birthDate": {
                     "type": "string",
                     "format": "date-time",
@@ -1347,6 +1577,10 @@
         "http.FriendUpsertRequest": {
             "type": "object",
             "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "🧑‍💻"
+                },
                 "birthDate": {
                     "type": "string",
                     "format": "date",
@@ -1407,6 +1641,45 @@
                 "title": {
                     "type": "string",
                     "example": "Livro de fotografia"
+                }
+            }
+        },
+        "http.ProfilePhotoSignedURLRequest": {
+            "type": "object",
+            "properties": {
+                "contentType": {
+                    "type": "string",
+                    "example": "image/jpeg"
+                },
+                "objectName": {
+                    "type": "string",
+                    "example": "friends/9b02ce54-4f42-4a8b-a539-5b53a6e37e63/profile-photo"
+                }
+            }
+        },
+        "http.ProfilePhotoSignedURLResponse": {
+            "type": "object",
+            "properties": {
+                "expiresAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-07-01T12:30:00Z"
+                },
+                "friendId": {
+                    "type": "string",
+                    "example": "9b02ce54-4f42-4a8b-a539-5b53a6e37e63"
+                },
+                "method": {
+                    "type": "string",
+                    "example": "PUT"
+                },
+                "objectName": {
+                    "type": "string",
+                    "example": "friends/9b02ce54-4f42-4a8b-a539-5b53a6e37e63/profile-photo"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "https://storage.googleapis.com/..."
                 }
             }
         },

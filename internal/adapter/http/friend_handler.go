@@ -17,6 +17,7 @@ type FriendHandler struct {
 type FriendUpsertRequest struct {
 	UserRelation string `json:"userRelation" example:"irma"`
 	Name         string `json:"name" example:"Mariana Souza"`
+	Avatar       string `json:"avatar,omitempty" example:"🧑‍💻"`
 	Gender       string `json:"gender" example:"female"`
 	BirthDate    string `json:"birthDate" format:"date" example:"1994-10-03"`
 	City         string `json:"city" example:"Belo Horizonte"`
@@ -28,7 +29,7 @@ func NewFriendHandler(repo port.FriendRepository) *FriendHandler {
 
 // Create godoc
 // @Summary     Criar amigo
-// @Description Exemplo de payload: {"userRelation":"irma","name":"Mariana Souza","gender":"female","birthDate":"1994-10-03","city":"Belo Horizonte"}. Campo birthDate no formato YYYY-MM-DD.
+// @Description Exemplo de payload: {"userRelation":"irma","name":"Mariana Souza","avatar":"🧑‍💻","gender":"female","birthDate":"1994-10-03","city":"Belo Horizonte"}. Campo birthDate no formato YYYY-MM-DD.
 // @Tags        friends
 // @Accept      json
 // @Produce     json
@@ -59,6 +60,7 @@ func (h *FriendHandler) Create(w http.ResponseWriter, r *http.Request) {
 		UserID:       r.PathValue("userId"),
 		UserRelation: req.UserRelation,
 		Name:         req.Name,
+		Avatar:       req.Avatar,
 		Gender:       domain.Gender(req.Gender),
 		BirthDate:    birthDate,
 		City:         req.City,
@@ -78,7 +80,7 @@ func (h *FriendHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // Update godoc
 // @Summary     Atualizar amigo
-// @Description Exemplo de payload: {"userRelation":"prima","name":"Mariana Souza","gender":"female","birthDate":"1994-10-03","city":"Curitiba"}. Campo birthDate no formato YYYY-MM-DD.
+// @Description Exemplo de payload: {"userRelation":"prima","name":"Mariana Souza","avatar":"🎨","gender":"female","birthDate":"1994-10-03","city":"Curitiba"}. Campo birthDate no formato YYYY-MM-DD.
 // @Tags        friends
 // @Accept      json
 // @Produce     json
@@ -110,6 +112,7 @@ func (h *FriendHandler) Update(w http.ResponseWriter, r *http.Request) {
 		FriendID:     r.PathValue("friendId"),
 		UserRelation: req.UserRelation,
 		Name:         req.Name,
+		Avatar:       req.Avatar,
 		Gender:       domain.Gender(req.Gender),
 		BirthDate:    birthDate,
 		City:         req.City,
