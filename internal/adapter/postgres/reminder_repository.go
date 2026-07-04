@@ -23,16 +23,17 @@ func (r *ReminderRepository) Create(ctx context.Context, reminder *domain.Remind
 	var msg *string
 
 	err := r.pool.QueryRow(ctx, `
-		INSERT INTO giftowner.reminders (user_id, friend_id, type, trigger_at, message)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING reminder_id, user_id, friend_id, type, trigger_at, message
+		INSERT INTO giftowner.reminders (user_id, friend_id, type, trigger_at, recurrence, message)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING reminder_id, user_id, friend_id, type, trigger_at, recurrence, message
 	`,
 		reminder.UserID,
 		reminder.FriendID,
 		reminder.Type,
 		reminder.TriggerAt,
+		string(reminder.Recurrence),
 		nullableString(reminder.Message),
-	).Scan(&created.ReminderID, &created.UserID, &created.FriendID, &created.Type, &created.TriggerAt, &msg)
+	).Scan(&created.ReminderID, &created.UserID, &created.FriendID, &created.Type, &created.TriggerAt, &created.Recurrence, &msg)
 	if err != nil {
 		return nil, err
 	}
@@ -49,15 +50,16 @@ func (r *ReminderRepository) Update(ctx context.Context, reminder *domain.Remind
 
 	err := r.pool.QueryRow(ctx, `
 		UPDATE giftowner.reminders
-		SET type = $1, trigger_at = $2, message = $3, updated_at = now()
-		WHERE reminder_id = $4
-		RETURNING reminder_id, user_id, friend_id, type, trigger_at, message
+		SET type = $1, trigger_at = $2, recurrence = $3, message = $4, updated_at = now()
+		WHERE reminder_id = $5
+		RETURNING reminder_id, user_id, friend_id, type, trigger_at, recurrence, message
 	`,
 		reminder.Type,
 		reminder.TriggerAt,
+		string(reminder.Recurrence),
 		nullableString(reminder.Message),
 		reminder.ReminderID,
-	).Scan(&updated.ReminderID, &updated.UserID, &updated.FriendID, &updated.Type, &updated.TriggerAt, &msg)
+	).Scan(&updated.ReminderID, &updated.UserID, &updated.FriendID, &updated.Type, &updated.TriggerAt, &updated.Recurrence, &msg)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -72,7 +74,7 @@ func (r *ReminderRepository) Update(ctx context.Context, reminder *domain.Remind
 
 func (r *ReminderRepository) GetByID(ctx context.Context, reminderID string) (*domain.Reminder, error) {
 	row := r.pool.QueryRow(ctx, `
-		SELECT reminder_id, user_id, friend_id, type, trigger_at, message
+		SELECT reminder_id, user_id, friend_id, type, trigger_at, recurrence, message
 		FROM giftowner.reminders
 		WHERE reminder_id = $1
 	`, reminderID)
@@ -80,7 +82,7 @@ func (r *ReminderRepository) GetByID(ctx context.Context, reminderID string) (*d
 	var reminder domain.Reminder
 	var message *string
 
-	err := row.Scan(&reminder.ReminderID, &reminder.UserID, &reminder.FriendID, &reminder.Type, &reminder.TriggerAt, &message)
+	err := row.Scan(&reminder.ReminderID, &reminder.UserID, &reminder.FriendID, &reminder.Type, &reminder.TriggerAt, &reminder.Recurrence, &message)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -97,7 +99,7 @@ func (r *ReminderRepository) GetByID(ctx context.Context, reminderID string) (*d
 
 func (r *ReminderRepository) ListByUserID(ctx context.Context, userID string) ([]*domain.Reminder, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT reminder_id, user_id, friend_id, type, trigger_at, message
+		SELECT reminder_id, user_id, friend_id, type, trigger_at, recurrence, message
 		FROM giftowner.reminders
 		WHERE user_id = $1
 		ORDER BY trigger_at
@@ -112,7 +114,7 @@ func (r *ReminderRepository) ListByUserID(ctx context.Context, userID string) ([
 
 func (r *ReminderRepository) ListPending(ctx context.Context, from, to time.Time) ([]*domain.Reminder, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT reminder_id, user_id, friend_id, type, trigger_at, message
+		SELECT reminder_id, user_id, friend_id, type, trigger_at, recurrence, message
 		FROM giftowner.reminders
 		WHERE trigger_at >= $1 AND trigger_at <= $2
 		ORDER BY trigger_at
@@ -135,7 +137,7 @@ func scanReminders(rows interface {
 		var rem domain.Reminder
 		var msg *string
 
-		if err := rows.Scan(&rem.ReminderID, &rem.UserID, &rem.FriendID, &rem.Type, &rem.TriggerAt, &msg); err != nil {
+		if err := rows.Scan(&rem.ReminderID, &rem.UserID, &rem.FriendID, &rem.Type, &rem.TriggerAt, &rem.Recurrence, &msg); err != nil {
 			return nil, err
 		}
 		if msg != nil {

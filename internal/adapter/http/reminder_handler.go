@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gift-app/api/internal/domain"
 	"github.com/gift-app/api/internal/port"
@@ -14,20 +15,30 @@ type ReminderHandler struct {
 }
 
 type ReminderUpsertRequest struct {
-	UserID    string `json:"userID" example:"a3f24e53-0d56-46d9-8ea2-0dbb5f64da8a"`
-	FriendID  string `json:"friendID" example:"9b02ce54-4f42-4a8b-a539-5b53a6e37e63"`
-	Type      string `json:"type" example:"birthday"`
-	TriggerAt string `json:"triggerAt" format:"date" example:"2026-08-15"`
-	Message   string `json:"message" example:"Comprar presente ate uma semana antes"`
+	UserID     string                    `json:"userID" example:"a3f24e53-0d56-469d-8ea2-0dbb5f64da8a"`
+	FriendID   string                    `json:"friendID" example:"9b02ce54-4f42-4a8b-a539-5b53a6e37e63"`
+	Type       string                    `json:"type" example:"birthday"`
+	TriggerAt  string                    `json:"triggerAt" format:"date" example:"2026-08-15"`
+	Recurrence domain.ReminderRecurrence `json:"recurrence" example:"yearly"`
+	Message    string                    `json:"message" example:"Comprar presente ate uma semana antes"`
 }
 
 func NewReminderHandler(repo port.ReminderRepository) *ReminderHandler {
 	return &ReminderHandler{repo: repo}
 }
 
+func populateNextOccurrence(r *domain.Reminder) {
+	if r == nil {
+		return
+	}
+	if next, ok := domain.NextOccurrence(r.Recurrence, r.TriggerAt, time.Now().UTC()); ok {
+		r.NextOccurrence = &next
+	}
+}
+
 // Create godoc
 // @Summary     Criar lembrete
-// @Description Exemplo de payload: {"friendID":"9b02ce54-4f42-4a8b-a539-5b53a6e37e63","type":"birthday","triggerAt":"2026-08-15","message":"Comprar presente ate uma semana antes"}. Campo triggerAt no formato YYYY-MM-DD.
+// @Description Exemplo de payload: {"friendID":"9b02ce54-4f42-4a8b-a539-5b53a6e37e63","type":"birthday","triggerAt":"2026-08-15","recurrence":"yearly","message":"Comprar presente ate uma semana antes"}. Campo triggerAt no formato YYYY-MM-DD. Campo recurrence opcional (default "none"); usar "yearly"/"monthly"/"weekly"/"daily" para eventos recorrentes.
 // @Tags        reminders
 // @Accept      json
 // @Produce     json
@@ -54,12 +65,22 @@ func (h *ReminderHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	recurrence := req.Recurrence
+	if recurrence == "" {
+		recurrence = domain.ReminderRecurrenceNone
+	}
+	if !recurrence.IsValid() {
+		writeError(w, http.StatusBadRequest, "recurrence must be one of: none, yearly, monthly, weekly, daily", errors.New("invalid recurrence"))
+		return
+	}
+
 	reminder := domain.Reminder{
-		UserID:    r.PathValue("userId"),
-		FriendID:  req.FriendID,
-		Type:      req.Type,
-		TriggerAt: triggerAt,
-		Message:   req.Message,
+		UserID:     r.PathValue("userId"),
+		FriendID:   req.FriendID,
+		Type:       req.Type,
+		TriggerAt:  triggerAt,
+		Recurrence: recurrence,
+		Message:    req.Message,
 	}
 
 	if reminder.FriendID == "" {
@@ -72,12 +93,13 @@ func (h *ReminderHandler) Create(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "could not create reminder", err)
 		return
 	}
+	populateNextOccurrence(created)
 	writeJSON(w, http.StatusCreated, created)
 }
 
 // Update godoc
 // @Summary     Atualizar lembrete
-// @Description Exemplo de payload: {"userID":"a3f24e53-0d56-46d9-8ea2-0dbb5f64da8a","friendID":"9b02ce54-4f42-4a8b-a539-5b53a6e37e63","type":"anniversary","triggerAt":"2026-09-20","message":"Enviar flores"}. Campo triggerAt no formato YYYY-MM-DD.
+// @Description Exemplo de payload: {"userID":"a3f24e53-0d56-469d-8ea2-0dbb5f64da8a","friendID":"9b02ce54-4f42-4a8b-a539-5b53a6e37e63","type":"anniversary","triggerAt":"2026-09-20","recurrence":"yearly","message":"Enviar flores"}. Campo triggerAt no formato YYYY-MM-DD. Atualizar recurrence recalcula as proximas ocorrencias.
 // @Tags        reminders
 // @Accept      json
 // @Produce     json
@@ -105,12 +127,22 @@ func (h *ReminderHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	recurrence := req.Recurrence
+	if recurrence == "" {
+		recurrence = domain.ReminderRecurrenceNone
+	}
+	if !recurrence.IsValid() {
+		writeError(w, http.StatusBadRequest, "recurrence must be one of: none, yearly, monthly, weekly, daily", errors.New("invalid recurrence"))
+		return
+	}
+
 	reminder := domain.Reminder{
 		ReminderID: r.PathValue("reminderId"),
 		UserID:     req.UserID,
 		FriendID:   req.FriendID,
 		Type:       req.Type,
 		TriggerAt:  triggerAt,
+		Recurrence: recurrence,
 		Message:    req.Message,
 	}
 
@@ -123,6 +155,7 @@ func (h *ReminderHandler) Update(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "reminder not found", errors.New("reminder not found"))
 		return
 	}
+	populateNextOccurrence(updated)
 	writeJSON(w, http.StatusOK, updated)
 }
 
@@ -140,6 +173,9 @@ func (h *ReminderHandler) ListByUserID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not list reminders", err)
 		return
+	}
+	for _, rem := range reminders {
+		populateNextOccurrence(rem)
 	}
 	writeJSON(w, http.StatusOK, reminders)
 }

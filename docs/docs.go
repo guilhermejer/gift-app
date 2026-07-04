@@ -821,7 +821,7 @@ const docTemplate = `{
         },
         "/reminders/{reminderId}": {
             "post": {
-                "description": "Exemplo de payload: {\"userID\":\"a3f24e53-0d56-46d9-8ea2-0dbb5f64da8a\",\"friendID\":\"9b02ce54-4f42-4a8b-a539-5b53a6e37e63\",\"type\":\"anniversary\",\"triggerAt\":\"2026-09-20\",\"message\":\"Enviar flores\"}. Campo triggerAt no formato YYYY-MM-DD.",
+                "description": "Exemplo de payload: {\"userID\":\"a3f24e53-0d56-469d-8ea2-0dbb5f64da8a\",\"friendID\":\"9b02ce54-4f42-4a8b-a539-5b53a6e37e63\",\"type\":\"anniversary\",\"triggerAt\":\"2026-09-20\",\"recurrence\":\"yearly\",\"message\":\"Enviar flores\"}. Campo triggerAt no formato YYYY-MM-DD. Atualizar recurrence recalcula as proximas ocorrencias.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1310,7 +1310,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Exemplo de payload: {\"friendID\":\"9b02ce54-4f42-4a8b-a539-5b53a6e37e63\",\"type\":\"birthday\",\"triggerAt\":\"2026-08-15\",\"message\":\"Comprar presente ate uma semana antes\"}. Campo triggerAt no formato YYYY-MM-DD.",
+                "description": "Exemplo de payload: {\"friendID\":\"9b02ce54-4f42-4a8b-a539-5b53a6e37e63\",\"type\":\"birthday\",\"triggerAt\":\"2026-08-15\",\"recurrence\":\"yearly\",\"message\":\"Comprar presente ate uma semana antes\"}. Campo triggerAt no formato YYYY-MM-DD. Campo recurrence opcional (default \"none\"); usar \"yearly\"/\"monthly\"/\"weekly\"/\"daily\" para eventos recorrentes.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1496,6 +1496,19 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Comprar presente ate uma semana antes"
                 },
+                "nextOccurrence": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2027-08-15T00:00:00Z"
+                },
+                "recurrence": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.ReminderRecurrence"
+                        }
+                    ],
+                    "example": "yearly"
+                },
                 "reminderID": {
                     "type": "string",
                     "example": "d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77"
@@ -1514,6 +1527,23 @@ const docTemplate = `{
                     "example": "5581a365-394f-467d-ae13-0d01e4cf1863"
                 }
             }
+        },
+        "domain.ReminderRecurrence": {
+            "type": "string",
+            "enum": [
+                "none",
+                "yearly",
+                "monthly",
+                "weekly",
+                "daily"
+            ],
+            "x-enum-varnames": [
+                "ReminderRecurrenceNone",
+                "ReminderRecurrenceYearly",
+                "ReminderRecurrenceMonthly",
+                "ReminderRecurrenceWeekly",
+                "ReminderRecurrenceDaily"
+            ]
         },
         "domain.User": {
             "type": "object",
@@ -1752,6 +1782,14 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Comprar presente ate uma semana antes"
                 },
+                "recurrence": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.ReminderRecurrence"
+                        }
+                    ],
+                    "example": "yearly"
+                },
                 "triggerAt": {
                     "type": "string",
                     "format": "date",
@@ -1763,7 +1801,7 @@ const docTemplate = `{
                 },
                 "userID": {
                     "type": "string",
-                    "example": "a3f24e53-0d56-46d9-8ea2-0dbb5f64da8a"
+                    "example": "a3f24e53-0d56-469d-8ea2-0dbb5f64da8a"
                 }
             }
         },
