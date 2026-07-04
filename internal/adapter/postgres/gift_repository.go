@@ -91,6 +91,11 @@ func (r *GiftRepository) Update(ctx context.Context, gift *domain.Gift) (*domain
 	return &updated, nil
 }
 
+func (r *GiftRepository) Delete(ctx context.Context, giftID string) error {
+	_, err := r.pool.Exec(ctx, `DELETE FROM giftowner.gifts WHERE gift_id = $1`, giftID)
+	return err
+}
+
 func (r *GiftRepository) GetByID(ctx context.Context, giftID string) (*domain.Gift, error) {
 	row := r.pool.QueryRow(ctx, `
 		SELECT gift_id, friend_id, title, description, price_range, tags, occasion_details, reminder_id

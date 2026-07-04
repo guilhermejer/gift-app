@@ -717,6 +717,31 @@ paths:
       tags:
       - profile-photos
   /gifts/{giftId}:
+    delete:
+      parameters:
+      - description: ID do presente
+        in: path
+        name: giftId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Gift'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Remover sugestão de presente
+      tags:
+      - gifts
     post:
       consumes:
       - application/json
@@ -909,6 +934,31 @@ paths:
       tags:
       - profile-agent
   /reminders/{reminderId}:
+    delete:
+      parameters:
+      - description: ID do lembrete
+        in: path
+        name: reminderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Reminder'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Remover lembrete
+      tags:
+      - reminders
     post:
       consumes:
       - application/json

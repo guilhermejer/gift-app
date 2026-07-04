@@ -102,11 +102,13 @@ func main() {
 	mux.HandleFunc("PUT /friends/{friendId}/gifts", giftHandler.Create)
 	mux.HandleFunc("GET /friends/{friendId}/gifts", giftHandler.ListByFriendID)
 	mux.HandleFunc("POST /gifts/{giftId}", giftHandler.Update)
+	mux.HandleFunc("DELETE /gifts/{giftId}", giftHandler.Delete)
 
 	// Reminders
 	mux.HandleFunc("PUT /users/{userId}/reminders", reminderHandler.Create)
 	mux.HandleFunc("GET /users/{userId}/reminders", reminderHandler.ListByUserID)
 	mux.HandleFunc("POST /reminders/{reminderId}", reminderHandler.Update)
+	mux.HandleFunc("DELETE /reminders/{reminderId}", reminderHandler.Delete)
 
 	handler := httpadapter.LoggingMiddleware(mux)
 

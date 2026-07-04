@@ -191,6 +191,35 @@ func (h *GiftHandler) Update(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, updated)
 }
 
+// Delete godoc
+// @Summary     Remover sugestão de presente
+// @Tags        gifts
+// @Produce     json
+// @Param       giftId path string true "ID do presente"
+// @Success     200 {object} domain.Gift
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /gifts/{giftId} [delete]
+func (h *GiftHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	giftID := r.PathValue("giftId")
+
+	existing, err := h.repo.GetByID(r.Context(), giftID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "could not validate gift", err)
+		return
+	}
+	if existing == nil {
+		writeError(w, http.StatusNotFound, "gift not found", errors.New("gift not found"))
+		return
+	}
+
+	if err := h.repo.Delete(r.Context(), giftID); err != nil {
+		writeError(w, http.StatusInternalServerError, "could not delete gift", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, existing)
+}
+
 // ListByFriendID godoc
 // @Summary     Listar sugestões de presente
 // @Tags        gifts

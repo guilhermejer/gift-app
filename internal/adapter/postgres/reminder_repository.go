@@ -72,6 +72,11 @@ func (r *ReminderRepository) Update(ctx context.Context, reminder *domain.Remind
 	return &updated, nil
 }
 
+func (r *ReminderRepository) Delete(ctx context.Context, reminderID string) error {
+	_, err := r.pool.Exec(ctx, `DELETE FROM giftowner.reminders WHERE reminder_id = $1`, reminderID)
+	return err
+}
+
 func (r *ReminderRepository) GetByID(ctx context.Context, reminderID string) (*domain.Reminder, error) {
 	row := r.pool.QueryRow(ctx, `
 		SELECT reminder_id, user_id, friend_id, type, trigger_at, recurrence, message

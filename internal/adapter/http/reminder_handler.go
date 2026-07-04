@@ -159,6 +159,35 @@ func (h *ReminderHandler) Update(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, updated)
 }
 
+// Delete godoc
+// @Summary     Remover lembrete
+// @Tags        reminders
+// @Produce     json
+// @Param       reminderId path string true "ID do lembrete"
+// @Success     200 {object} domain.Reminder
+// @Failure     404 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /reminders/{reminderId} [delete]
+func (h *ReminderHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	reminderID := r.PathValue("reminderId")
+
+	existing, err := h.repo.GetByID(r.Context(), reminderID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "could not validate reminder", err)
+		return
+	}
+	if existing == nil {
+		writeError(w, http.StatusNotFound, "reminder not found", errors.New("reminder not found"))
+		return
+	}
+
+	if err := h.repo.Delete(r.Context(), reminderID); err != nil {
+		writeError(w, http.StatusInternalServerError, "could not delete reminder", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, existing)
+}
+
 // ListByUserID godoc
 // @Summary     Listar lembretes do usuário
 // @Tags        reminders
