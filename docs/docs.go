@@ -1526,12 +1526,18 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
         "domain.Profile": {
             "type": "object",
             "properties": {
+                "budget": {
+                    "type": "string"
+                },
                 "dislikes": {
                     "type": "array",
                     "items": {
@@ -1753,6 +1759,10 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "example": "Livro de fotografia"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "gift"
                 }
             }
         },
@@ -1798,6 +1808,10 @@ const docTemplate = `{
         "http.ProfileUpsertRequest": {
             "type": "object",
             "properties": {
+                "budget": {
+                    "type": "string",
+                    "example": "Até R$100"
+                },
                 "dislikes": {
                     "type": "array",
                     "items": {

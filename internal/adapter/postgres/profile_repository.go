@@ -27,28 +27,30 @@ func (r *ProfileRepository) Save(ctx context.Context, profile *domain.Profile) e
 	}
 
 	_, err := r.pool.Exec(ctx, `
-		INSERT INTO giftowner.profiles (friend_id, likes, dislikes, personality, embedding)
-		VALUES ($1, $2, $3, $4, $5::vector)
+		INSERT INTO giftowner.profiles (friend_id, likes, dislikes, personality, embedding, budget)
+		VALUES ($1, $2, $3, $4, $5::vector, $6)
 		ON CONFLICT (friend_id) DO UPDATE
-		    SET likes     = EXCLUDED.likes,
-		        dislikes  = EXCLUDED.dislikes,
-		        personality = EXCLUDED.personality,
-		        embedding = EXCLUDED.embedding,
-		        updated_at = now()
-	`, profile.FriendID, profile.Likes, profile.Dislikes, profile.Personality, embedding)
+		    SET likes       = COALESCE(NULLIF(EXCLUDED.likes, '{}'), giftowner.profiles.likes),
+		        dislikes    = COALESCE(NULLIF(EXCLUDED.dislikes, '{}'), giftowner.profiles.dislikes),
+		        personality = COALESCE(NULLIF(EXCLUDED.personality, '{}'), giftowner.profiles.personality),
+		        embedding   = COALESCE(EXCLUDED.embedding, giftowner.profiles.embedding),
+		        budget      = CASE WHEN EXCLUDED.budget IS NULL THEN giftowner.profiles.budget ELSE EXCLUDED.budget END,
+		        updated_at  = now()
+	`, profile.FriendID, profile.Likes, profile.Dislikes, profile.Personality, embedding, profile.Budget)
 	return err
 }
 
 func (r *ProfileRepository) GetByFriendID(ctx context.Context, friendID string) (*domain.Profile, error) {
 	row := r.pool.QueryRow(ctx, `
-		SELECT friend_id, likes, dislikes, personality, embedding::text
+		SELECT friend_id, likes, dislikes, personality, embedding::text, budget
 		FROM giftowner.profiles
 		WHERE friend_id = $1
 	`, friendID)
 
 	var p domain.Profile
 	var embeddingText *string
-	err := row.Scan(&p.FriendID, &p.Likes, &p.Dislikes, &p.Personality, &embeddingText)
+	var budget *string
+	err := row.Scan(&p.FriendID, &p.Likes, &p.Dislikes, &p.Personality, &embeddingText, &budget)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -63,6 +65,8 @@ func (r *ProfileRepository) GetByFriendID(ctx context.Context, friendID string) 
 		}
 		p.Embedding = embedding
 	}
+
+	p.Budget = budget
 
 	return &p, nil
 }

@@ -21,6 +21,7 @@ type GiftUpsertRequest struct {
 	Description     string   `json:"description" example:"Edicao especial de fotografia urbana"`
 	PriceRange      string   `json:"priceRange" example:"R$ 120 - R$ 180"`
 	Tags            []string `json:"tags" example:"fotografia,livros,arte"`
+	Type            string   `json:"type" example:"gift"`
 	OccasionDetails string   `json:"occasionDetails" example:"Aniversario em 2026-08-15; gosta de arte visual"`
 	ReminderID      string   `json:"reminderID" example:"d8c8efdf-c52f-4d6b-8e2e-b83f78de4f77"`
 }
@@ -72,6 +73,7 @@ func (h *GiftHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Description:     req.Description,
 		PriceRange:      req.PriceRange,
 		Tags:            req.Tags,
+		Type:            req.Type,
 		OccasionDetails: req.OccasionDetails,
 		ReminderID:      req.ReminderID,
 	}
@@ -148,8 +150,12 @@ func (h *GiftHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Description:     req.Description,
 		PriceRange:      req.PriceRange,
 		Tags:            req.Tags,
+		Type:            existing.Type,
 		OccasionDetails: existing.OccasionDetails,
 		ReminderID:      existing.ReminderID,
+	}
+	if req.Type != "" {
+		gift.Type = req.Type
 	}
 	if req.OccasionDetails != "" {
 		gift.OccasionDetails = req.OccasionDetails

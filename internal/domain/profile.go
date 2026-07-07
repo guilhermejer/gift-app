@@ -6,4 +6,5 @@ type Profile struct {
 	Dislikes    []string  `json:"dislikes"`
 	Personality []string  `json:"personality"`
 	Embedding   []float32 `json:"embedding,omitempty"`
+	Budget      *string   `json:"budget,omitempty"`
 }

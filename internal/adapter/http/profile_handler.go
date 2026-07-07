@@ -15,10 +15,11 @@ type ProfileHandler struct {
 
 type ProfileUpsertRequest struct {
 	FriendID    string    `json:"friendID" example:"9b02ce54-4f42-4a8b-a539-5b53a6e37e63"`
-	Likes       []string  `json:"likes" example:"fotografia,musica,viagem"`
-	Dislikes    []string  `json:"dislikes" example:"multidoes,atraso"`
-	Personality []string  `json:"personality" example:"introvertida,criativa,detalhista"`
-	Embedding   []float32 `json:"embedding" example:"0.12,-0.44,0.91"`
+	Likes       []string  `json:"likes,omitempty" example:"fotografia,musica,viagem"`
+	Dislikes    []string  `json:"dislikes,omitempty" example:"multidoes,atraso"`
+	Personality []string  `json:"personality,omitempty" example:"introvertida,criativa,detalhista"`
+	Embedding   []float32 `json:"embedding,omitempty" example:"0.12,-0.44,0.91"`
+	Budget      *string   `json:"budget,omitempty" example:"Até R$100"`
 }
 
 func NewProfileHandler(repo port.ProfileRepository) *ProfileHandler {
@@ -60,6 +61,7 @@ func (h *ProfileHandler) Save(w http.ResponseWriter, r *http.Request) {
 		Dislikes:    req.Dislikes,
 		Personality: req.Personality,
 		Embedding:   req.Embedding,
+		Budget:      req.Budget,
 	}
 
 	if err := h.repo.Save(r.Context(), &profile); err != nil {

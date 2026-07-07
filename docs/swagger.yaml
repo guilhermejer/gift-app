@@ -61,9 +61,13 @@ definitions:
         type: array
       title:
         type: string
+      type:
+        type: string
     type: object
   domain.Profile:
     properties:
+      budget:
+        type: string
       dislikes:
         items:
           type: string
@@ -223,6 +227,9 @@ definitions:
       title:
         example: Livro de fotografia
         type: string
+      type:
+        example: gift
+        type: string
     type: object
   http.ProfilePhotoSignedURLRequest:
     properties:
@@ -254,6 +261,9 @@ definitions:
     type: object
   http.ProfileUpsertRequest:
     properties:
+      budget:
+        example: Até R$100
+        type: string
       dislikes:
         example:
         - multidoes

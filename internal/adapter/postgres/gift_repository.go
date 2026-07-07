@@ -21,19 +21,25 @@ func (r *GiftRepository) Create(ctx context.Context, gift *domain.Gift) (*domain
 	var created domain.Gift
 	var description, priceRange, occasionDetails, reminderID *string
 
+	giftType := gift.Type
+	if !domain.IsValidGiftType(giftType) {
+		giftType = domain.GiftTypeGift
+	}
+
 	err := r.pool.QueryRow(ctx, `
-		INSERT INTO giftowner.gifts (friend_id, title, description, price_range, tags, occasion_details, reminder_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING gift_id, friend_id, title, description, price_range, tags, occasion_details, reminder_id
+		INSERT INTO giftowner.gifts (friend_id, title, description, price_range, tags, type, occasion_details, reminder_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING gift_id, friend_id, title, description, price_range, tags, type, occasion_details, reminder_id
 	`,
 		gift.FriendID,
 		gift.Title,
 		nullableString(gift.Description),
 		nullableString(gift.PriceRange),
 		gift.Tags,
+		giftType,
 		nullableString(gift.OccasionDetails),
 		nullableString(gift.ReminderID),
-	).Scan(&created.GiftID, &created.FriendID, &created.Title, &description, &priceRange, &created.Tags, &occasionDetails, &reminderID)
+	).Scan(&created.GiftID, &created.FriendID, &created.Title, &description, &priceRange, &created.Tags, &created.Type, &occasionDetails, &reminderID)
 	if err != nil {
 		return nil, err
 	}
@@ -56,20 +62,26 @@ func (r *GiftRepository) Update(ctx context.Context, gift *domain.Gift) (*domain
 	var updated domain.Gift
 	var description, priceRange, occasionDetails, reminderID *string
 
+	giftType := gift.Type
+	if !domain.IsValidGiftType(giftType) {
+		giftType = domain.GiftTypeGift
+	}
+
 	err := r.pool.QueryRow(ctx, `
 		UPDATE giftowner.gifts
-		SET title = $1, description = $2, price_range = $3, tags = $4, occasion_details = $5, reminder_id = $6, updated_at = now()
-		WHERE gift_id = $7
-		RETURNING gift_id, friend_id, title, description, price_range, tags, occasion_details, reminder_id
+		SET title = $1, description = $2, price_range = $3, tags = $4, type = $5, occasion_details = $6, reminder_id = $7, updated_at = now()
+		WHERE gift_id = $8
+		RETURNING gift_id, friend_id, title, description, price_range, tags, type, occasion_details, reminder_id
 	`,
 		gift.Title,
 		nullableString(gift.Description),
 		nullableString(gift.PriceRange),
 		gift.Tags,
+		giftType,
 		nullableString(gift.OccasionDetails),
 		nullableString(gift.ReminderID),
 		gift.GiftID,
-	).Scan(&updated.GiftID, &updated.FriendID, &updated.Title, &description, &priceRange, &updated.Tags, &occasionDetails, &reminderID)
+	).Scan(&updated.GiftID, &updated.FriendID, &updated.Title, &description, &priceRange, &updated.Tags, &updated.Type, &occasionDetails, &reminderID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -98,14 +110,14 @@ func (r *GiftRepository) Delete(ctx context.Context, giftID string) error {
 
 func (r *GiftRepository) GetByID(ctx context.Context, giftID string) (*domain.Gift, error) {
 	row := r.pool.QueryRow(ctx, `
-		SELECT gift_id, friend_id, title, description, price_range, tags, occasion_details, reminder_id
+		SELECT gift_id, friend_id, title, description, price_range, tags, type, occasion_details, reminder_id
 		FROM giftowner.gifts
 		WHERE gift_id = $1
 	`, giftID)
 
 	var g domain.Gift
 	var description, priceRange, occasionDetails, reminderID *string
-	err := row.Scan(&g.GiftID, &g.FriendID, &g.Title, &description, &priceRange, &g.Tags, &occasionDetails, &reminderID)
+	err := row.Scan(&g.GiftID, &g.FriendID, &g.Title, &description, &priceRange, &g.Tags, &g.Type, &occasionDetails, &reminderID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -129,7 +141,7 @@ func (r *GiftRepository) GetByID(ctx context.Context, giftID string) (*domain.Gi
 
 func (r *GiftRepository) ListByFriendID(ctx context.Context, friendID string) ([]*domain.Gift, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT gift_id, friend_id, title, description, price_range, tags, occasion_details, reminder_id
+		SELECT gift_id, friend_id, title, description, price_range, tags, type, occasion_details, reminder_id
 		FROM giftowner.gifts
 		WHERE friend_id = $1
 		ORDER BY created_at DESC
@@ -144,7 +156,7 @@ func (r *GiftRepository) ListByFriendID(ctx context.Context, friendID string) ([
 		var g domain.Gift
 		var description, priceRange, occasionDetails, reminderID *string
 
-		if err := rows.Scan(&g.GiftID, &g.FriendID, &g.Title, &description, &priceRange, &g.Tags, &occasionDetails, &reminderID); err != nil {
+		if err := rows.Scan(&g.GiftID, &g.FriendID, &g.Title, &description, &priceRange, &g.Tags, &g.Type, &occasionDetails, &reminderID); err != nil {
 			return nil, err
 		}
 		if description != nil {
