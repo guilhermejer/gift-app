@@ -1655,6 +1655,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": ""
                 },
+                "suggestionLookaheadDays": {
+                    "type": "integer",
+                    "example": 7
+                },
                 "userID": {
                     "type": "string",
                     "example": "5581a365-394f-467d-ae13-0d01e4cf1863"
@@ -1957,6 +1961,10 @@ const docTemplate = `{
                 "planId": {
                     "type": "string",
                     "example": "basic"
+                },
+                "suggestionLookaheadDays": {
+                    "type": "integer",
+                    "example": 7
                 }
             }
         }

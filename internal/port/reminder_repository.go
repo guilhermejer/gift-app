@@ -15,4 +15,6 @@ type ReminderRepository interface {
 	ListByUserID(ctx context.Context, userID string) ([]*domain.Reminder, error)
 	// ListPending retorna lembretes com trigger_at entre from e to (para envio de notificações).
 	ListPending(ctx context.Context, from, to time.Time) ([]*domain.Reminder, error)
+	// ListRecurring retorna lembretes com recorrência ativa (recurrence != 'none').
+	ListRecurring(ctx context.Context) ([]*domain.Reminder, error)
 }

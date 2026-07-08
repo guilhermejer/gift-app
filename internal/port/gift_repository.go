@@ -2,6 +2,7 @@ package port
 
 import (
 	"context"
+	"time"
 
 	"github.com/gift-app/api/internal/domain"
 )
@@ -12,4 +13,5 @@ type GiftRepository interface {
 	Delete(ctx context.Context, giftID string) error
 	GetByID(ctx context.Context, giftID string) (*domain.Gift, error)
 	ListByFriendID(ctx context.Context, friendID string) ([]*domain.Gift, error)
+	ListRecentByReminderID(ctx context.Context, reminderID string, since time.Time) ([]*domain.Gift, error)
 }

@@ -132,6 +132,21 @@ func (r *ReminderRepository) ListPending(ctx context.Context, from, to time.Time
 	return scanReminders(rows)
 }
 
+func (r *ReminderRepository) ListRecurring(ctx context.Context) ([]*domain.Reminder, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT reminder_id, user_id, friend_id, type, trigger_at, recurrence, message
+		FROM giftowner.reminders
+		WHERE recurrence != 'none'
+		ORDER BY trigger_at
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanReminders(rows)
+}
+
 func scanReminders(rows interface {
 	Next() bool
 	Scan(dest ...any) error

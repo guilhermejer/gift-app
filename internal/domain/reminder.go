@@ -8,13 +8,11 @@ const (
 	ReminderRecurrenceNone    ReminderRecurrence = "none"
 	ReminderRecurrenceYearly  ReminderRecurrence = "yearly"
 	ReminderRecurrenceMonthly ReminderRecurrence = "monthly"
-	ReminderRecurrenceWeekly  ReminderRecurrence = "weekly"
-	ReminderRecurrenceDaily   ReminderRecurrence = "daily"
 )
 
 func (r ReminderRecurrence) IsValid() bool {
 	switch r {
-	case ReminderRecurrenceNone, ReminderRecurrenceYearly, ReminderRecurrenceMonthly, ReminderRecurrenceWeekly, ReminderRecurrenceDaily:
+	case ReminderRecurrenceNone, ReminderRecurrenceYearly, ReminderRecurrenceMonthly:
 		return true
 	}
 	return false

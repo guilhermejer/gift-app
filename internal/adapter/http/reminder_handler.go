@@ -116,37 +116,47 @@ func (h *ReminderHandler) Update(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-	if req.TriggerAt == "" {
-		writeError(w, http.StatusBadRequest, "trigger_at is required", errors.New("trigger_at is required"))
-		return
-	}
 
-	triggerAt, err := parseDateOnly(req.TriggerAt)
+	reminderID := r.PathValue("reminderId")
+	existing, err := h.repo.GetByID(r.Context(), reminderID)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "triggerAt must be in format YYYY-MM-DD", err)
+		writeError(w, http.StatusInternalServerError, "could not fetch reminder", err)
+		return
+	}
+	if existing == nil {
+		writeError(w, http.StatusNotFound, "reminder not found", errors.New("reminder not found"))
 		return
 	}
 
-	recurrence := req.Recurrence
-	if recurrence == "" {
-		recurrence = domain.ReminderRecurrenceNone
+	if req.UserID != "" {
+		existing.UserID = req.UserID
 	}
-	if !recurrence.IsValid() {
-		writeError(w, http.StatusBadRequest, "recurrence must be one of: none, yearly, monthly, weekly, daily", errors.New("invalid recurrence"))
-		return
+	if req.FriendID != "" {
+		existing.FriendID = req.FriendID
+	}
+	if req.Type != "" {
+		existing.Type = req.Type
+	}
+	if req.TriggerAt != "" {
+		triggerAt, err := parseDateOnly(req.TriggerAt)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "triggerAt must be in format YYYY-MM-DD", err)
+			return
+		}
+		existing.TriggerAt = triggerAt
+	}
+	if req.Recurrence != "" {
+		if !req.Recurrence.IsValid() {
+			writeError(w, http.StatusBadRequest, "recurrence must be one of: none, yearly, monthly, weekly, daily", errors.New("invalid recurrence"))
+			return
+		}
+		existing.Recurrence = req.Recurrence
+	}
+	if req.Message != "" {
+		existing.Message = req.Message
 	}
 
-	reminder := domain.Reminder{
-		ReminderID: r.PathValue("reminderId"),
-		UserID:     req.UserID,
-		FriendID:   req.FriendID,
-		Type:       req.Type,
-		TriggerAt:  triggerAt,
-		Recurrence: recurrence,
-		Message:    req.Message,
-	}
-
-	updated, err := h.repo.Update(r.Context(), &reminder)
+	updated, err := h.repo.Update(r.Context(), existing)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not update reminder", err)
 		return

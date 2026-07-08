@@ -73,21 +73,6 @@ func NextOccurrence(rec ReminderRecurrence, base, after time.Time) (time.Time, b
 			cand = addMonthsSafe(baseUTC, diffMonths+1)
 		}
 		return cand, true
-	case ReminderRecurrenceWeekly:
-		deltaDays := int(afterUTC.Sub(baseUTC).Hours() / 24)
-		diffWeeks := deltaDays / 7
-		cand := baseUTC.AddDate(0, 0, diffWeeks*7)
-		if !cand.After(afterUTC) {
-			cand = baseUTC.AddDate(0, 0, (diffWeeks+1)*7)
-		}
-		return cand, true
-	case ReminderRecurrenceDaily:
-		deltaDays := int(afterUTC.Sub(baseUTC).Hours() / 24)
-		cand := baseUTC.AddDate(0, 0, deltaDays)
-		if !cand.After(afterUTC) {
-			cand = baseUTC.AddDate(0, 0, deltaDays+1)
-		}
-		return cand, true
 	}
 	return time.Time{}, false
 }

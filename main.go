@@ -8,8 +8,10 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"time"
 
@@ -18,6 +20,7 @@ import (
 	httpadapter "github.com/gift-app/api/internal/adapter/http"
 	"github.com/gift-app/api/internal/adapter/llmapi"
 	"github.com/gift-app/api/internal/adapter/postgres"
+	"github.com/gift-app/api/internal/job"
 	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
@@ -38,30 +41,27 @@ func main() {
 	}
 	defer pool.Close()
 
-	userHandler := httpadapter.NewUserHandler(postgres.NewUserRepository(pool))
-	friendHandler := httpadapter.NewFriendHandler(postgres.NewFriendRepository(pool))
-	profileHandler := httpadapter.NewProfileHandler(postgres.NewProfileRepository(pool))
+	userRepo := postgres.NewUserRepository(pool)
+	friendRepo := postgres.NewFriendRepository(pool)
+	profileRepo := postgres.NewProfileRepository(pool)
+	giftRepo := postgres.NewGiftRepository(pool)
+	reminderRepo := postgres.NewReminderRepository(pool)
+	jobLogRepo := postgres.NewSuggestionJobLogRepository(pool)
+
+	llmClient := newLLMClientFromEnv()
+
+	userHandler := httpadapter.NewUserHandler(userRepo)
+	friendHandler := httpadapter.NewFriendHandler(friendRepo)
+	profileHandler := httpadapter.NewProfileHandler(profileRepo)
 	profilePhotoStorage, err := gcsstorage.NewSignedURLServiceFromEnv(context.Background())
 	if err != nil {
 		log.Fatalf("could not initialize GCS signed url service: %v", err)
 	}
-	profilePhotoHandler := httpadapter.NewProfilePhotoHandler(postgres.NewFriendRepository(pool), profilePhotoStorage)
-	profileAgentHandler := httpadapter.NewProfileAgentHandler(
-		newLLMClientFromEnv(),
-		postgres.NewFriendRepository(pool),
-	)
-	suggestionAgentHandler := httpadapter.NewSuggestionAgentHandler(
-		newLLMClientFromEnv(),
-		postgres.NewGiftRepository(pool),
-		postgres.NewFriendRepository(pool),
-		postgres.NewReminderRepository(pool),
-	)
-	giftHandler := httpadapter.NewGiftHandler(
-		postgres.NewGiftRepository(pool),
-		postgres.NewFriendRepository(pool),
-		postgres.NewReminderRepository(pool),
-	)
-	reminderHandler := httpadapter.NewReminderHandler(postgres.NewReminderRepository(pool))
+	profilePhotoHandler := httpadapter.NewProfilePhotoHandler(friendRepo, profilePhotoStorage)
+	profileAgentHandler := httpadapter.NewProfileAgentHandler(llmClient, friendRepo)
+	suggestionAgentHandler := httpadapter.NewSuggestionAgentHandler(llmClient, giftRepo, friendRepo, reminderRepo)
+	giftHandler := httpadapter.NewGiftHandler(giftRepo, friendRepo, reminderRepo)
+	reminderHandler := httpadapter.NewReminderHandler(reminderRepo)
 
 	mux := http.NewServeMux()
 
@@ -112,10 +112,65 @@ func main() {
 
 	handler := httpadapter.LoggingMiddleware(mux)
 
-	log.Println("server listening on :8080")
-	if err := http.ListenAndServe(":8080", handler); err != nil {
-		log.Fatal(err)
+	// Start suggestion job if enabled
+	jobInterval := getJobInterval()
+	jobEnabled := os.Getenv("GIFT_SUGGESTION_JOB_ENABLED") == "true"
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	if jobEnabled {
+		suggestionJob := job.NewSuggestionJob(
+			reminderRepo,
+			userRepo,
+			giftRepo,
+			jobLogRepo,
+			llmClient,
+			jobInterval,
+		)
+		go suggestionJob.Run(ctx)
+		slog.Info("suggestion job enabled", "interval", jobInterval)
+	} else {
+		slog.Info("suggestion job disabled")
 	}
+
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: handler,
+	}
+
+	go func() {
+		slog.Info("server listening on :8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server error: %v", err)
+		}
+	}()
+
+	// Wait for SIGINT
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	<-sig
+
+	slog.Info("shutting down...")
+	cancel()
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		slog.Error("server forced to shutdown", "error", err)
+	}
+}
+
+func getJobInterval() time.Duration {
+	raw := os.Getenv("GIFT_SUGGESTION_JOB_INTERVAL_SECONDS")
+	if raw == "" {
+		return 24 * time.Hour
+	}
+	parsed, err := strconv.Atoi(raw)
+	if err != nil || parsed <= 0 {
+		return 24 * time.Hour
+	}
+	return time.Duration(parsed) * time.Second
 }
 
 func newLLMClientFromEnv() *llmapi.Client {

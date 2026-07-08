@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/gift-app/api/internal/domain"
 	"github.com/jackc/pgx/v5"
@@ -146,6 +147,43 @@ func (r *GiftRepository) ListByFriendID(ctx context.Context, friendID string) ([
 		WHERE friend_id = $1
 		ORDER BY created_at DESC
 	`, friendID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var gifts []*domain.Gift
+	for rows.Next() {
+		var g domain.Gift
+		var description, priceRange, occasionDetails, reminderID *string
+
+		if err := rows.Scan(&g.GiftID, &g.FriendID, &g.Title, &description, &priceRange, &g.Tags, &g.Type, &occasionDetails, &reminderID); err != nil {
+			return nil, err
+		}
+		if description != nil {
+			g.Description = *description
+		}
+		if priceRange != nil {
+			g.PriceRange = *priceRange
+		}
+		if occasionDetails != nil {
+			g.OccasionDetails = *occasionDetails
+		}
+		if reminderID != nil {
+			g.ReminderID = *reminderID
+		}
+		gifts = append(gifts, &g)
+	}
+	return gifts, rows.Err()
+}
+
+func (r *GiftRepository) ListRecentByReminderID(ctx context.Context, reminderID string, since time.Time) ([]*domain.Gift, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT gift_id, friend_id, title, description, price_range, tags, type, occasion_details, reminder_id
+		FROM giftowner.gifts
+		WHERE reminder_id = $1 AND created_at >= $2
+		ORDER BY created_at DESC
+	`, reminderID, since)
 	if err != nil {
 		return nil, err
 	}

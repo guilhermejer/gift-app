@@ -152,6 +152,9 @@ definitions:
       planID:
         example: ""
         type: string
+      suggestionLookaheadDays:
+        example: 7
+        type: integer
       userID:
         example: 5581a365-394f-467d-ae13-0d01e4cf1863
         type: string
@@ -367,6 +370,9 @@ definitions:
       planId:
         example: basic
         type: string
+      suggestionLookaheadDays:
+        example: 7
+        type: integer
     type: object
 host: localhost:8080
 info:

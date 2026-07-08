@@ -95,30 +95,6 @@ func TestNextOccurrence(t *testing.T) {
 			want:   "2026-02-28",
 			wantOk: true,
 		},
-		{
-			name:   "weekly returns next week",
-			rec:    ReminderRecurrenceWeekly,
-			base:   mustDate(t, "2026-06-29"),
-			after:  now,
-			want:   "2026-07-06",
-			wantOk: true,
-		},
-		{
-			name:   "daily returns tomorrow",
-			rec:    ReminderRecurrenceDaily,
-			base:   mustDate(t, "2026-07-01"),
-			after:  now,
-			want:   "2026-07-05",
-			wantOk: true,
-		},
-		{
-			name:   "after equals base returns first step forward",
-			rec:    ReminderRecurrenceDaily,
-			base:   mustDate(t, "2026-07-04"),
-			after:  mustDate(t, "2026-07-04"),
-			want:   "2026-07-05",
-			wantOk: true,
-		},
 	}
 
 	for _, tc := range tests {
@@ -164,14 +140,6 @@ func TestOccurrencesBetween(t *testing.T) {
 			want: []string{},
 		},
 		{
-			name: "daily expands occurrences in window",
-			rec:  ReminderRecurrenceDaily,
-			base: mustDate(t, "2026-07-01"),
-			from: mustDate(t, "2026-07-04"),
-			to:   mustDate(t, "2026-07-06"),
-			want: []string{"2026-07-04", "2026-07-05", "2026-07-06"},
-		},
-		{
 			name: "yearly skips years outside window",
 			rec:  ReminderRecurrenceYearly,
 			base: mustDate(t, "2020-08-15"),
@@ -188,8 +156,8 @@ func TestOccurrencesBetween(t *testing.T) {
 			want: []string{"2026-07-15", "2026-08-15", "2026-09-15"},
 		},
 		{
-			name: "to before from returns empty",
-			rec:  ReminderRecurrenceDaily,
+			name:   "to before from returns empty",
+			rec:    ReminderRecurrenceNone,
 			base: mustDate(t, "2026-07-01"),
 			from: mustDate(t, "2026-07-10"),
 			to:   mustDate(t, "2026-07-05"),

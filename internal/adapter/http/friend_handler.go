@@ -98,27 +98,42 @@ func (h *FriendHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var birthDate time.Time
+	friendID := r.PathValue("friendId")
+	existing, err := h.repo.GetByID(r.Context(), friendID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "could not fetch friend", err)
+		return
+	}
+	if existing == nil {
+		writeError(w, http.StatusNotFound, "friend not found", errors.New("friend not found"))
+		return
+	}
+
+	if req.UserRelation != "" {
+		existing.UserRelation = req.UserRelation
+	}
+	if req.Name != "" {
+		existing.Name = req.Name
+	}
+	if req.Avatar != "" {
+		existing.Avatar = req.Avatar
+	}
+	if req.Gender != "" {
+		existing.Gender = domain.Gender(req.Gender)
+	}
 	if req.BirthDate != "" {
 		parsedBirthDate, err := parseDateOnly(req.BirthDate)
 		if err != nil {
 			writeError(w, http.StatusBadRequest, "birthDate must be in format YYYY-MM-DD", err)
 			return
 		}
-		birthDate = parsedBirthDate
+		existing.BirthDate = parsedBirthDate
+	}
+	if req.City != "" {
+		existing.City = req.City
 	}
 
-	friend := domain.Friend{
-		FriendID:     r.PathValue("friendId"),
-		UserRelation: req.UserRelation,
-		Name:         req.Name,
-		Avatar:       req.Avatar,
-		Gender:       domain.Gender(req.Gender),
-		BirthDate:    birthDate,
-		City:         req.City,
-	}
-
-	updated, err := h.repo.Update(r.Context(), &friend)
+	updated, err := h.repo.Update(r.Context(), existing)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "could not update friend", err)
 		return

@@ -16,12 +16,13 @@ type UserHandler struct {
 }
 
 type UserUpsertRequest struct {
-	FullName  string `json:"fullName" example:"Ana Souza"`
-	Email     string `json:"email" example:"ana.souza@email.com"`
-	Active    bool   `json:"active" example:"true"`
-	PlanID    string `json:"planId" example:"basic"`
-	BirthDate string `json:"birthDate" format:"date" example:"1992-07-21"`
-	City      string `json:"city" example:"Sao Paulo"`
+	FullName                string `json:"fullName" example:"Ana Souza"`
+	Email                   string `json:"email" example:"ana.souza@email.com"`
+	Active                  bool   `json:"active" example:"true"`
+	PlanID                  string `json:"planId" example:"basic"`
+	BirthDate               string `json:"birthDate" format:"date" example:"1992-07-21"`
+	City                    string `json:"city" example:"Sao Paulo"`
+	SuggestionLookaheadDays *int   `json:"suggestionLookaheadDays" example:"7"`
 }
 
 func NewUserHandler(repo port.UserRepository) *UserHandler {
@@ -65,6 +66,13 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		BirthDate: birthDate,
 		City:      req.City,
 	}
+	if req.SuggestionLookaheadDays != nil {
+		if !domain.IsValidLookaheadDays(*req.SuggestionLookaheadDays) {
+			writeError(w, http.StatusBadRequest, "suggestionLookaheadDays must be one of 7, 14, 30", errors.New("invalid lookahead"))
+			return
+		}
+		user.SuggestionLookaheadDays = *req.SuggestionLookaheadDays
+	}
 
 	created, err := h.repo.Create(r.Context(), &user)
 	if err != nil {
@@ -99,27 +107,49 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var birthDate time.Time
+	userID := r.PathValue("userId")
+	existing, err := h.repo.GetByID(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "could not fetch user", err)
+		return
+	}
+	if existing == nil {
+		writeError(w, http.StatusNotFound, "user not found", errors.New("user not found"))
+		return
+	}
+
+	if req.FullName != "" {
+		existing.FullName = req.FullName
+	}
+	if req.Email != "" {
+		existing.Email = req.Email
+	}
 	if req.BirthDate != "" {
 		parsedBirthDate, err := parseDateOnly(req.BirthDate)
 		if err != nil {
 			writeError(w, http.StatusBadRequest, "birthDate must be in format YYYY-MM-DD", err)
 			return
 		}
-		birthDate = parsedBirthDate
+		existing.BirthDate = parsedBirthDate
+	}
+	if req.PlanID != "" {
+		existing.PlanID = req.PlanID
+	}
+	if req.City != "" {
+		existing.City = req.City
+	}
+	if req.Active {
+		existing.Active = true
+	}
+	if req.SuggestionLookaheadDays != nil {
+		if !domain.IsValidLookaheadDays(*req.SuggestionLookaheadDays) {
+			writeError(w, http.StatusBadRequest, "suggestionLookaheadDays must be one of 7, 14, 30", errors.New("invalid lookahead"))
+			return
+		}
+		existing.SuggestionLookaheadDays = *req.SuggestionLookaheadDays
 	}
 
-	user := domain.User{
-		UserID:    r.PathValue("userId"),
-		FullName:  req.FullName,
-		Email:     req.Email,
-		Active:    req.Active,
-		PlanID:    req.PlanID,
-		BirthDate: birthDate,
-		City:      req.City,
-	}
-
-	updated, err := h.repo.Update(r.Context(), &user)
+	updated, err := h.repo.Update(r.Context(), existing)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserEmailAlreadyExists) {
 			writeError(w, http.StatusConflict, "email already exists", err)
