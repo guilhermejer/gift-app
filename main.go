@@ -62,6 +62,7 @@ func main() {
 	suggestionAgentHandler := httpadapter.NewSuggestionAgentHandler(llmClient, giftRepo, friendRepo, reminderRepo)
 	giftHandler := httpadapter.NewGiftHandler(giftRepo, friendRepo, reminderRepo)
 	reminderHandler := httpadapter.NewReminderHandler(reminderRepo)
+	authHandler := httpadapter.NewAuthHandler(userRepo)
 
 	mux := http.NewServeMux()
 
@@ -109,6 +110,9 @@ func main() {
 	mux.HandleFunc("GET /users/{userId}/reminders", reminderHandler.ListByUserID)
 	mux.HandleFunc("POST /reminders/{reminderId}", reminderHandler.Update)
 	mux.HandleFunc("DELETE /reminders/{reminderId}", reminderHandler.Delete)
+
+	// Auth
+	mux.HandleFunc("POST /auth/google", authHandler.Google)
 
 	handler := httpadapter.LoggingMiddleware(mux)
 

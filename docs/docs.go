@@ -15,6 +15,52 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/google": {
+            "post": {
+                "description": "Recebe ID token do Google, valida, faz upsert do usuário por email e retorna o user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Autenticar com Google",
+                "parameters": [
+                    {
+                        "description": "ID token do Google",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.AuthGoogleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/friends/{friendId}": {
             "get": {
                 "produces": [
@@ -1615,16 +1661,12 @@ const docTemplate = `{
             "enum": [
                 "none",
                 "yearly",
-                "monthly",
-                "weekly",
-                "daily"
+                "monthly"
             ],
             "x-enum-varnames": [
                 "ReminderRecurrenceNone",
                 "ReminderRecurrenceYearly",
-                "ReminderRecurrenceMonthly",
-                "ReminderRecurrenceWeekly",
-                "ReminderRecurrenceDaily"
+                "ReminderRecurrenceMonthly"
             ]
         },
         "domain.User": {
@@ -1684,6 +1726,14 @@ const docTemplate = `{
                 "friendID": {
                     "type": "string",
                     "example": "9b02ce54-4f42-4a8b-a539-5b53a6e37e63"
+                }
+            }
+        },
+        "http.AuthGoogleRequest": {
+            "type": "object",
+            "properties": {
+                "idToken": {
+                    "type": "string"
                 }
             }
         },

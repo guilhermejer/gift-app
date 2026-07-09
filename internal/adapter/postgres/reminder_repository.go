@@ -165,5 +165,11 @@ func scanReminders(rows interface {
 		}
 		reminders = append(reminders, &rem)
 	}
-	return reminders, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if reminders == nil {
+		return []*domain.Reminder{}, nil
+	}
+	return reminders, nil
 }

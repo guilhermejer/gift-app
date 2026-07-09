@@ -174,7 +174,13 @@ func (r *GiftRepository) ListByFriendID(ctx context.Context, friendID string) ([
 		}
 		gifts = append(gifts, &g)
 	}
-	return gifts, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if gifts == nil {
+		return []*domain.Gift{}, nil
+	}
+	return gifts, nil
 }
 
 func (r *GiftRepository) ListRecentByReminderID(ctx context.Context, reminderID string, since time.Time) ([]*domain.Gift, error) {
@@ -211,5 +217,11 @@ func (r *GiftRepository) ListRecentByReminderID(ctx context.Context, reminderID 
 		}
 		gifts = append(gifts, &g)
 	}
-	return gifts, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if gifts == nil {
+		return []*domain.Gift{}, nil
+	}
+	return gifts, nil
 }

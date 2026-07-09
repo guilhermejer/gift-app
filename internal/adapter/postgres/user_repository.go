@@ -188,7 +188,13 @@ func (r *UserRepository) ListAll(ctx context.Context) ([]*domain.User, error) {
 		}
 		users = append(users, &u)
 	}
-	return users, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if users == nil {
+		return []*domain.User{}, nil
+	}
+	return users, nil
 }
 
 func isUniqueEmailViolation(err error) bool {

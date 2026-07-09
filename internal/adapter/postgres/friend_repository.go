@@ -83,7 +83,13 @@ func (r *FriendRepository) ListByUserID(ctx context.Context, userID string) ([]*
 		}
 		friends = append(friends, f)
 	}
-	return friends, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if friends == nil {
+		return []*domain.Friend{}, nil
+	}
+	return friends, nil
 }
 
 type scanner interface {
